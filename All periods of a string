@@ -31,11 +31,8 @@ void build_prefix()
 
 int main()
 {
-    ifstream in("perioada2.in");
-    ofstream out("perioada2.out");
-
-    in >> N;
-    in >> ( S + 1 );
+    cin >> N;
+    cin >> ( S + 1 );
 
     build_prefix();
 
@@ -50,7 +47,7 @@ int main()
         lgprefix = pi[lgprefix];
     }
 
-    out << sol << "\n";
+    cout << sol << "\n";
 
     return 0;
 }
