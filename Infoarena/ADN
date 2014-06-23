@@ -6,7 +6,7 @@
 using namespace std;
 
 const int Nmax = 18;
-const int Lmax = 1e5 + 2;
+const int Lmax = 3e4 + 2;
 const int inf = 0x3f3f3f3f;
 
 /// Cost[i][j] = cel mai lung sufix al lui sir[i] care este prefix al lui sir[i]
