@@ -4,7 +4,7 @@
 
 using namespace std;
 
-const int Lmax = 100 + 2;
+const int Lmax = 1000 + 2;
 
 char S[Lmax];      /// original string
 char SS[2 * Lmax]; /// transformed string
@@ -39,7 +39,8 @@ void Manacher()
     for ( int i = 1; i <= NN; ++i )
     {
         if ( rightEndOfLongestPalindrome > i )
-                P[i] = min( P[2 * indexOfLongestPalindrome - i], rightEndOfLongestPalindrome - i ); /// we either choose
+                P[i] = min( P[2 * indexOfLongestPalindrome - i], rightEndOfLongestPalindrome - i ); /// we either choose the mirror of i relative to indexOfLongestPalindrome
+                                                                                                    /// or we choose to skip some characters because these characters are for sure to be palindromic
         else
                 P[i] = 0;
 
