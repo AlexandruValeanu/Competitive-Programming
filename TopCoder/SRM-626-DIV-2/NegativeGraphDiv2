@@ -1,0 +1,81 @@
+#include <iostream>
+#include <fstream>
+#include <vector>
+#include <cstring>
+#include <algorithm>
+#include <cstdlib>
+#include <ctime>
+#include <queue>
+
+using namespace std;
+
+#define pp pair<int,int>
+
+const int Nmax = 50 + 2;
+const int Cmax = 1000 + 2;
+const long long INF = 1e18;
+
+class NegativeGraphDiv2
+{
+public:
+
+    vector <pp> G[Nmax];
+    queue < pp > Q;
+    long long A[Nmax][Cmax];
+
+    long long findMin(int N, vector <int> s, vector <int> t, vector <int> weight, int charges )
+    {
+        int E = s.size();
+
+        for ( int i = 0; i < E; ++i )
+        {
+            ///if ( s[i] != t[i] )
+                G[ s[i] ].push_back( pp( t[i], weight[i] ) );
+        }
+
+        for ( int i = 1; i <= N; ++i )
+        {
+            for ( int j = 0; j <= charges; ++j )
+                    A[i][j] = INF;
+        }
+
+        A[1][charges] = 0;
+
+        Q.push( pp( 1, charges ) );
+
+        while ( Q.size() )
+        {
+            int nod = Q.front().first;
+            int charge_nod = Q.front().second;
+            Q.pop();
+
+            for ( int i = 0; i < G[nod].size(); ++i )
+            {
+                int vecin = G[nod][i].first;
+                long long cost = G[nod][i].second;
+
+                if ( A[vecin][charge_nod] > A[nod][charge_nod] + cost )
+                {
+                    A[vecin][charge_nod] = A[nod][charge_nod] + cost;
+                    Q.push( pp( vecin, charge_nod ) );
+                }
+
+                if ( charge_nod > 0 )
+                {
+                    if ( A[vecin][charge_nod - 1] > A[nod][charge_nod] - cost )
+                    {
+                        A[vecin][charge_nod - 1] = A[nod][charge_nod] - cost;
+                        Q.push( pp( vecin, charge_nod - 1 ) );
+                    }
+                }
+            }
+        }
+
+        long long minim = INF;
+
+        for ( int j = 0; j <= charges; ++j )
+            minim = min( minim, A[N][j] );
+
+        return minim;
+    }
+};
