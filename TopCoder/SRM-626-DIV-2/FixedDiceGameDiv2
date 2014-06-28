@@ -1,0 +1,28 @@
+#include <iostream>
+#include <fstream>
+#include <cstring>
+#include <algorithm>
+
+using namespace std;
+
+class FixedDiceGameDiv2
+{
+public:
+
+    double getExpectation(int a, int b)
+    {
+        double sol = 0;
+        double cnt = 0;
+
+        for ( int i = 1; i <= b; ++i )
+        {
+            for ( int j = i + 1; j <= a; ++j )
+            {
+                sol += j;
+                cnt++;
+            }
+        }
+
+        return sol / cnt;
+    }
+};
