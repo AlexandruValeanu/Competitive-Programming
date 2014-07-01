@@ -1,0 +1,48 @@
+#include <iostream>
+#include <fstream>
+#include <cstring>
+#include <algorithm>
+#include <vector>
+
+using namespace std;
+
+const int Nmax = 50;
+const int Bmax = 60;
+
+long long DP[Bmax + 1][Nmax + 1];
+int apar[Bmax + 1];
+
+class PowersOfTwo
+{
+public:
+
+    long long memo( int bit, int extra )
+    {
+        if ( DP[bit][extra] != -1 )
+            return DP[bit][extra];
+
+        if ( bit == Bmax )
+            return 1;
+
+        DP[bit][extra] = 0;
+
+        int new_extra = apar[bit] + extra;
+
+        DP[bit][extra] += memo( bit + 1, new_extra / 2 );
+
+        if ( new_extra > 0 )
+            DP[bit][extra] += memo( bit + 1, ( new_extra - 1 ) / 2 );
+
+        return DP[bit][extra];
+    }
+
+    long long count(vector<long long> powers)
+    {
+        for ( int i = 0; i < Bmax; ++i )
+            apar[i] = std::count( powers.begin(), powers.end(), ( 1LL << i ) );
+
+        memset( DP, -1, sizeof ( DP ) );
+
+        return memo( 0, 0 );
+    }
+};
