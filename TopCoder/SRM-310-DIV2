@@ -1,0 +1,34 @@
+#include <iostream>
+#include <algorithm>
+
+using namespace std;
+
+class MeasuringTemperature
+{
+public:
+
+    double averageTemperature(vector <int> measuredValues)
+    {
+        double sum = 0;
+        double nr = 0;
+
+        for ( int i = 0; i < measuredValues.size(); ++i )
+        {
+            if ( measuredValues[i] < -273 ) continue;
+
+            if ( i >= 2 )
+            {
+                if ( abs( measuredValues[i] - measuredValues[i - 1] ) > 2 && abs( measuredValues[i] - measuredValues[i - 2] ) > 2  )
+                    continue;
+            }
+
+            sum += measuredValues[i];
+            nr++;
+        }
+
+        if ( nr == 0 )
+            return -300.0;
+        else
+            return ( sum / nr );
+    }
+};
