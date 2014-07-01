@@ -1,0 +1,25 @@
+#include <iostream>
+#include <fstream>
+#include <cstring>
+#include <algorithm>
+#include <vector>
+
+using namespace std;
+
+class LeftAndRightHandedDiv2
+{
+public:
+
+    int count(string S)
+    {
+        int sol = 0;
+
+        for ( int i = 0; i < S.size() - 1; ++i )
+        {
+            if ( S[i] == 'R' && S[i + 1] == 'L' )
+                sol++;
+        }
+
+        return sol;
+    }
+};
