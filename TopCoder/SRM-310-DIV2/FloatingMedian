@@ -1,0 +1,86 @@
+#include <iostream>
+#include <fstream>
+
+using namespace std;
+
+const int MOD = 65536;
+const int Nmax = 25e4;
+
+class FloatingMedian
+{
+public:
+
+    int aib[MOD + 1];
+    int a[Nmax];
+    int N;
+
+    int lsb( int x )
+    {
+        return x & ( -x );
+    }
+
+    void update( int pos, int val )
+    {
+        for ( int i = pos; i <= MOD; i += lsb( i ) )
+            aib[i] += val;
+    }
+
+    int query( int pos )
+    {
+        int sum = 0;
+
+        for ( int i = pos; i >= 1; i -= lsb( i ) )
+            sum += aib[i];
+
+        return sum;
+    }
+
+    int findMed( int k )
+    {
+        int lo = 1, hi = MOD - 1;
+
+        while ( lo <= hi )
+        {
+            int m = ( lo + hi ) / 2;
+
+            int val = query( m );
+
+            if ( val == k )
+                return m;
+
+            if ( val < k )
+                lo = m + 1;
+            else
+                hi = m - 1;
+        }
+
+        return -1;
+    }
+
+    long long sumOfMedians(int seed, int mul, int add, int _N, int K)
+    {
+        long long sol;
+
+        N = _N;
+
+        a[1] = seed;
+
+        for ( int i = 2; i <= N; ++i )
+        {
+            a[i] = ( 1LL * a[i - 1] * mul + add) % MOD;
+        }
+
+        for ( int i = 1; i < K; ++i )
+            update( a[i] + 1, 1 );
+
+        for ( int i = K; i <= N; ++i )
+        {
+            update( a[i] + 1, 1 );
+            int median = findMed( ( K + 1 ) / 2 ) - 1;
+            sol += 1LL * median;
+            update( a[i - K + 1] + 1, -1 );
+        }
+
+        return sol;
+    }
+};
