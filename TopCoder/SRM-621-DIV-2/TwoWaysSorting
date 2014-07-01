@@ -1,0 +1,66 @@
+#include <iostream>
+#include <fstream>
+#include <vector>
+#include <cstring>
+#include <algorithm>
+
+using namespace std;
+
+int cmp( const string &a, const string &b )
+{
+    return a.size() < b.size();
+}
+
+class TwoWaysSorting
+{
+public:
+
+    string sortingMethod(vector <string> stringList)
+    {
+        vector <string> v = stringList, vv = stringList;
+
+        sort( v.begin(), v.end() );
+        sort( vv.begin(), vv.end(), cmp );
+
+        int validB = 1;
+        int validL = 1;
+        int validLG = 1;
+
+        for ( int i = 0; i < v.size(); ++i )
+        {
+            if ( v[i] != stringList[i] )
+            {
+                validL = 0;
+            }
+
+            if ( i > 0 )
+            {
+                if ( v[i].size() > v[i - 1].size() )
+                    validLG = 0;
+            }
+        }
+
+        if ( validL )
+        {
+            if ( validLG )
+                return "both";
+            else
+                return "lexicographically";
+        }
+        else
+        {
+            int vis = 1;
+
+            for ( int i = 0; i < vv.size(); ++i )
+            {
+                if ( vv[i] != stringList[i] )
+                    vis = 0;
+            }
+
+            if ( vis )
+                return "lengths";
+        }
+
+        return "none";
+    }
+};
