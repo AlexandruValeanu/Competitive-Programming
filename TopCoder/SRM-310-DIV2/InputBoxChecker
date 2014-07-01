@@ -1,0 +1,37 @@
+#include <iostream>
+#include <fstream>
+#include <cstring>
+#include <vector>
+
+using namespace std;
+
+class InputBoxChecker
+{
+public:
+
+    int valid(long long smallest, long long largest, long long number)
+    {
+        for ( long long l = 1; number * l <= largest; l *= 10LL )
+        {
+            if ( smallest / l <= number && number <= largest / l )
+                return true;
+        }
+
+        return false;
+    }
+
+    vector <string> checkPrefix(int smallest, int largest, vector <int> numbers)
+    {
+        vector <string> v;
+
+        for ( int i = 0; i < numbers.size(); ++i )
+        {
+            if ( valid( smallest, largest, numbers[i] ) )
+                v.push_back( "VALID" );
+            else
+                v.push_back( "INVALID" );
+        }
+
+        return v;
+    }
+};
