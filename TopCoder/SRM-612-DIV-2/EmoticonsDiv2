@@ -1,0 +1,44 @@
+#include <iostream>
+#include <fstream>
+#include <cstring>
+#include <algorithm>
+#include <queue>
+
+using namespace std;
+
+#define pp pair<int,int>
+
+const int Nmax = 1000 + 3;
+const int inf = 1e9;
+int A[Nmax][Nmax]; /// A[i][j] = i emoticons on the screen and j in the clipboard
+
+class EmoticonsDiv2
+{
+public:
+
+    int printSmiles(int smiles)
+    {
+        for ( int i = 0; i <= smiles; ++i )
+            for ( int j = 0; j <= smiles; ++j )
+                A[i][j] = inf;
+
+        A[1][0] = 0;
+
+        for ( int i = 1; i <= smiles; ++i )
+            for ( int j = 0; j <= smiles; ++j )
+            {
+                if ( i + j <= smiles && A[i + j][j] > A[i][j] + 1 )
+                    A[i + j][j] = A[i][j] + 1;
+
+                if ( A[i][i] > A[i][j] + 1 )
+                    A[i][i] = A[i][j] + 1;
+            }
+
+        int minim = inf;
+
+        for ( int i = 1; i <= smiles; ++i )
+            minim = min( minim, A[smiles][i] );
+
+        return minim;
+    }
+};
