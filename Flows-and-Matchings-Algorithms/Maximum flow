@@ -1,0 +1,106 @@
+#include <iostream>
+#include <fstream>
+#include <vector>
+#include <cstring>
+#include <algorithm>
+
+using namespace std;
+
+const int Nmax = 1e3 + 2;
+
+vector <int> G[Nmax];
+
+int C[Nmax][Nmax];
+int F[Nmax][Nmax];
+
+int father[Nmax];
+int coada[Nmax];
+
+int N, M;
+
+bool BFS( int S, int D )
+{
+    int st, dr;
+
+    coada[st = dr = 1] = S;
+    father[S] = S;
+    fill( father + 1, father + N + 1, 0 );
+
+    while ( st <= dr )
+    {
+        int nod = coada[ st++ ];
+
+        for ( auto vecin: G[nod] )
+        {
+            if ( father[vecin] == 0 && C[nod][vecin] > F[nod][vecin] )
+            {
+                father[vecin] = nod;
+                coada[ ++dr ] = vecin;
+
+                if ( vecin == D )
+                    return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+int Edmonds_Karp( int S, int D )
+{
+    int flow = 0;
+
+    while ( BFS( S, D ) )
+    {
+        for ( auto vecin: G[D] )
+        {
+            if ( father[vecin] == 0 || F[vecin][D] >= C[vecin][D] )
+                continue;
+
+            father[D] = vecin;
+
+            int flow_min = 1e9;
+
+            for ( int node = D; node != S; node = father[ node ] )
+                flow_min = min( flow_min, C[ father[node] ][node] - F[ father[node] ][node] );
+
+            if ( flow_min == 0 )
+                continue;
+
+            for ( int node = D; node != S; node = father[ node ] )
+            {
+                F[ father[node] ][node] += flow_min;
+                F[node][ father[node] ] -= flow_min;
+            }
+
+            flow += flow_min;
+        }
+    }
+
+    return flow;
+}
+
+void add_edge( int i, int j, int c )
+{
+    G[i].push_back( j );
+
+    if ( c )
+        C[i][j] = c;
+}
+
+int main()
+{
+    cin >> N >> M;
+
+    for ( int i = 1, a, b, c; i <= M; ++i )
+    {
+        cin >> a >> b >> c;
+
+        add_edge( a, b, c );
+        add_edge( b, a, 0 );
+    }
+
+    cout << Edmonds_Karp( 1, N ) << "\n";
+
+    return 0;
+}
