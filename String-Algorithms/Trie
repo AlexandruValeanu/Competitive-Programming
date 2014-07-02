@@ -1,0 +1,157 @@
+#include <iostream>
+#include <fstream>
+#include <cstring>
+
+using namespace std;
+
+const int SIGMA = 26;
+
+class TrieNode
+{
+public:
+
+    TrieNode *sons[SIGMA];
+    int count;
+    int nr_sons;
+
+    TrieNode()
+    {
+        count = 0;
+        nr_sons = 0;
+        memset( sons, 0, sizeof( sons ) );
+    }
+};
+
+class Trie
+{
+private:
+
+    TrieNode *root;
+
+    void insert( TrieNode *&R, const string &str, size_t pos )
+    {
+        if ( pos == str.size() )
+        {
+            R->count++;
+        }
+        else
+        {
+            if ( R->sons[ str[pos] - 'a' ] == NULL )
+            {
+                R->nr_sons++;
+                R->sons[ str[pos] - 'a' ] = new TrieNode();
+            }
+
+            insert( R->sons[ str[pos] - 'a' ], str, pos + 1 );
+        }
+    }
+
+    int find( TrieNode *R, const string &str, size_t pos )
+    {
+        if ( pos == str.size() )
+        {
+            return R->count;
+        }
+        else
+        {
+            if ( R->sons[ str[pos] - 'a' ] == NULL )
+                return 0;
+
+            return find( R->sons[ str[pos] - 'a' ], str, pos + 1 );
+        }
+    }
+
+    bool erase( TrieNode *&R, const string &str, size_t pos )
+    {
+        if ( pos == str.size() )
+        {
+            R->count--;
+        }
+        else
+        {
+            if ( erase( R->sons[ str[pos] - 'a' ], str, pos + 1 ) )
+            {
+                R->sons[ str[pos] - 'a' ] = NULL;
+                R->nr_sons--;
+            }
+        }
+
+        if ( R->count == 0 && R->nr_sons == 0 && R != root )
+        {
+            delete R;
+            return true;
+        }
+
+        return false;
+    }
+
+    int longest_common_prefix( TrieNode *R, const string &str, size_t pos )
+    {
+        if ( pos == str.size() )
+        {
+            return 0;
+        }
+        else
+        {
+            if ( R->sons[ str[pos] - 'a' ] != NULL )
+                return 1 + longest_common_prefix( R->sons[ str[pos] - 'a' ], str, pos + 1 );
+            else
+                return 0;
+        }
+    }
+
+public:
+
+    Trie()
+    {
+        root = new TrieNode();
+    }
+
+    void insert( const string &str )
+    {
+        insert( root, str, 0 );
+    }
+
+    int find( const string &str )
+    {
+        return find( root, str, 0 );
+    }
+
+    void erase( const string &str )
+    {
+        erase( root, str, 0 );
+    }
+
+    int longest_common_prefix( const string &str )
+    {
+        return longest_common_prefix( root, str, 0 );
+    }
+};
+
+int main()
+{
+    ///ifstream in("trie.in");
+    ///ofstream out("trie.out");
+
+    Trie T;
+
+    cin.sync_with_stdio( false );
+
+    string str;
+    int type;
+
+    while ( cin >> type >> str )
+    {
+        switch( type )
+        {
+            case 0: T.insert( str ); break;
+            case 1: T.erase( str );  break;
+            case 2: cout << T.find( str ) << "\n"; break;
+            case 3: cout << T.longest_common_prefix( str ) << "\n"; break;
+
+            default: break;
+        }
+    }
+
+    return 0;
+}
