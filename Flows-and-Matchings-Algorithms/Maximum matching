@@ -1,0 +1,74 @@
+#include <iostream>
+#include <fstream>
+#include <cstring>
+#include <vector>
+#include <algorithm>
+
+using namespace std;
+
+const int Nmax = 1e4 + 2;
+
+vector <int> G[Nmax];
+int st[Nmax], dr[Nmax];
+bool use[Nmax];
+
+int N, M, E;
+
+bool pairup( int nod )
+{
+    if ( use[nod] )
+        return false;
+
+    use[nod] = true;
+
+    for ( auto x: G[nod] )
+        if ( !dr[x] || pairup( dr[x] ))
+        {
+            st[nod] = x;
+            dr[x] = nod;
+            return true;
+        }
+
+    return false;
+}
+
+void Hopcroft_Karp()
+{
+    for ( int change = 1; change; )
+    {
+        change = 0;
+
+        fill( use + 1, use + N + 1, 0 );
+
+        for ( int i = 1; i <= N; ++i )
+            if ( !st[i] )
+                change |= pairup( i );
+    }
+
+    int match = 0;
+
+    for ( int i = 1; i <= N; ++i )
+        match += ( st[i] > 0 );
+
+    cout << match << "\n";
+
+    for ( int i = 1; i <= N; ++i )
+        if ( st[i] )
+            cout << i << " " << st[i] << "\n";
+}
+
+int main()
+{
+    cin >> N >> M >> E;
+
+    for ( int i = 1, a, b; i <= E; ++i )
+    {
+        cin >> a >> b;
+
+        G[a].push_back( b );
+    }
+
+    Hopcroft_Karp();
+
+    return 0;
+}
