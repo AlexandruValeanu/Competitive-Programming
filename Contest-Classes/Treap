@@ -1,0 +1,155 @@
+#include <iostream>
+#include <fstream>
+#include <cstdlib>
+#include <ctime>
+
+using namespace std;
+
+class Treap
+{
+public:
+
+    int key;
+    int priority;
+    int nr_nodes;
+
+    Treap *st, *dr;
+
+    Treap()
+    {
+        key = priority = nr_nodes = 0;
+        st = dr = NULL;
+    }
+
+    Treap( int _key, int _priority, int _nr_nodes, Treap *_st, Treap *_dr )
+    {
+        key = _key;
+        priority = _priority;
+        st = _st;
+        dr = _dr;
+    }
+
+} *root, *NIL;
+
+void initTreap()
+{
+    srand( time( NULL ) );
+    NIL = new Treap( 0, 0, 0, NULL, NULL );
+    root = NIL;
+}
+
+void update( Treap *&T )
+{
+    T->nr_nodes = 1 + T->st->nr_nodes + T->dr->nr_nodes;
+}
+
+void rotateRight( Treap *&T )
+{
+    Treap *aux = T->st;
+    T->st = aux->dr;
+    aux->dr = T;
+
+    update( T );
+    update( aux );
+
+    T = aux;
+}
+
+void rotateLeft( Treap *&T )
+{
+    Treap *aux = T->dr;
+    T->dr = aux->st;
+    aux->st = T;
+
+    update( T );
+    update( aux );
+
+    T = aux;
+}
+
+void balance( Treap *&T )
+{
+    if ( T->st->priority > T->priority )
+        rotateRight( T );
+
+    if ( T->dr->priority > T->priority )
+        rotateLeft( T );
+
+    update( T );
+}
+
+void insert( Treap *&T, int key, int priority = rand() + 1 )
+{
+    if ( T == NIL )
+    {
+        T = new Treap( key, priority, 1, NIL, NIL );
+    }
+    else
+    {
+        if ( key < T->key )
+            insert( T->st, key, priority );
+        else
+            if ( key > T->key )
+                insert( T->dr, key, priority );
+
+        balance( T );
+    }
+}
+
+void erase( Treap *&T, int key )
+{
+    if ( T == NIL ) return;
+
+    if ( key < T->key )
+        erase( T->st, key );
+    else
+        if ( key > T->key )
+            erase( T->dr, key );
+        else
+        {
+            if ( T->st == NIL && T->dr == NIL )
+            {
+                delete T;
+                T = NIL;
+            }
+            else
+            {
+                if ( T->st->priority > T->dr->priority )
+                {
+                    rotateRight( T );
+                    erase( T->dr, key );
+                }
+                else
+                {
+                    rotateLeft( T );
+                    erase( T->st, key );
+                }
+            }
+        }
+
+    if ( T != NIL )
+        update( T );
+}
+
+int find( Treap *T, int key )
+{
+    if ( T == NIL )      return 0;
+    if ( key == T->key ) return 1;
+    if ( key < T->key )  return find( T->st, key );
+    else                 return find( T->dr, key );
+}
+
+int kth_element( Treap *T, int kth )
+{
+    if ( kth > T->nr_nodes ) return -1; /// ERROR
+
+    if ( T->st->nr_nodes + 1 == kth ) return T->key;
+
+    if ( kth <= T->st->nr_nodes ) return kth_element( T->st, kth );
+    else                          return kth_element( T->dr, kth - 1 - T->st->nr_nodes );
+}
+
+int main()
+{
+    return 0;
+}
