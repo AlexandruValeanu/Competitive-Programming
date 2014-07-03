@@ -1,0 +1,77 @@
+#include <iostream>
+#include <fstream>
+#include <cstring>
+
+using namespace std;
+
+template <const int DIM, const int MOD>
+class Matrix
+{
+private:
+
+    int n;
+    int A[DIM][DIM];
+
+public:
+
+    Matrix()
+    {
+        n = DIM;
+
+        memset( A, 0, sizeof( A ) );
+    }
+
+    void set( int i, int j, int val )
+    {
+        A[i][j] = val;
+    }
+
+    int get( int i, int j )
+    {
+        return A[i][j];
+    }
+
+    void operator = ( const Matrix &M )
+    {
+        for ( int i = 0; i < n; ++i )
+            for ( int j = 0; j < n; ++j )
+                A[i][j] = M.A[i][j];
+    }
+
+    Matrix operator * ( const Matrix &M ) const
+    {
+        Matrix C;
+
+        for ( int i = 0; i < n; ++i )
+            for ( int j = 0; j < n; ++j )
+                for ( int k = 0; k < n; ++k )
+                    C.A[i][j] = ( 1LL * C.A[i][j] + 1LL * A[i][k] * M.A[k][j] ) % MOD;
+
+        return C;
+    }
+
+    Matrix operator ^ ( int power ) const
+    {
+        Matrix sol;
+        Matrix aux = *this;
+
+        for ( int i = 0; i < n; ++i )
+            sol.A[i][i] = 1;
+
+        for ( int i = 0; ( 1 << i ) <= power; ++i )
+        {
+            if ( power & ( 1 << i ) )
+                sol = sol * aux;
+
+            aux = aux * aux;
+        }
+
+        return sol;
+    }
+};
+
+int main()
+{
+
+    return 0;
+}
