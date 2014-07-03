@@ -1,0 +1,62 @@
+#include <iostream>
+#include <fstream>
+#include <vector>
+#include <algorithm>
+
+using namespace std;
+
+template <typename Type, int MOD>
+class HashTable
+{
+private:
+
+    vector < vector<Type> > HT;
+
+public:
+
+    HashTable()
+    {
+        HT = vector < vector<Type> >( MOD );
+    }
+
+    int func( const Type key )
+    {
+        return key % MOD;
+    }
+
+    bool find( const Type key )
+    {
+        int value = func( key );
+
+        for ( auto it = HT[value].begin(); it != HT[value].end(); ++it )
+            if ( *it == key )
+                return true;
+
+        return false;
+    }
+
+    void insert( const Type key )
+    {
+        int value = func( key );
+
+        if ( find( key ) == false )
+            HT[value].push_back( key );
+    }
+
+    void erase( const Type key )
+    {
+        int value = func( key );
+
+        for ( auto it = HT[value].begin(); it != HT[value].end(); ++it )
+            if ( *it == key )
+            {
+                HT[value].erase( it );
+                break;
+            }
+    }
+};
+
+int main()
+{
+    return 0;
+}
