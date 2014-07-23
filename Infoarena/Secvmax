@@ -17,6 +17,7 @@
 
 #define popcount                    __builtin_popcount
 #define gcd                         __gcd
+#define putchar(c)                  putchar_unlocked(c)
 #define bit(n,i)                    ( n & ( 1 << i ) )
 #define lsb(x)                      ( x & ( -x ) )
 
@@ -150,7 +151,7 @@ int main()
     {
         read( a );
         write( bsearch( a ) );
-        putchar_unlocked( '\n' );
+        putchar( '\n' );
     }
 
     return 0;
