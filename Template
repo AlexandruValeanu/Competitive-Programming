@@ -2,6 +2,7 @@
 
 #define VI vector<int>
 #define VII vector<pair<int,int>>
+#define QI queue<int>
 
 #define ms(a,v) memset( a, v, sizeof( a ) )
 #define FOR(i,a,b) for(int i = a; i <= b; ++i)
@@ -51,6 +52,11 @@ inline void write( int a )
 {
     char s[20];
     int i = 0;
+    int sign = 1;
+
+    if ( a < 0 )
+        sign = -1,
+        a = -a;
 
     do
     {
@@ -61,19 +67,23 @@ inline void write( int a )
 
     i--;
 
+    if ( sign == -1 )
+        putchar_unlocked( '-' );
+
     while ( i >= 0 ) putchar_unlocked( s[ i-- ] );
 }
 
 const int dx[] = { -1, 0, 1, 0 };
 const int dy[] = { 0, 1, 0, -1 };
 
-const int dl[] = { -1, -1, -1,  0, 0,  1, 1, 1 };
-const int dc[] = { -1,  0,  1, -1, 1, -1, 0, 1 };
+const int dl[] = { -1, -1, -1, 0, 0, 1, 1, 1 };
+const int dc[] = { -1, 0, 1, -1, 1, -1, 0, 1 };
 
-const int INF = 1e9;
+const int INF = 2e9;
 const double EPS = 1e-9;
 
-const int Nmax = 1e3 + 2;
+const int Nmax = 1e4 + 2;
+
 const int LgMax = log2(Nmax) + 1;
 
 using namespace std;
