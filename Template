@@ -3,7 +3,7 @@
 #define VI vector<int>
 #define VII vector<pair<int,int>>
 
-#define ms(a) memset( a, 0, sizeof( a ) )
+#define ms(a,v) memset( a, v, sizeof( a ) )
 #define FOR(i,a,b) for(int i = a; i <= b; ++i)
 #define ROF(i,a,b) for(int i = a; i >= b; i--)
 #define foreach(v, c) for( typeof( (c).begin() ) v = (c).begin(); v != (c).end(); ++v)
@@ -64,13 +64,17 @@ inline void write( int a )
     while ( i >= 0 ) putchar_unlocked( s[ i-- ] );
 }
 
-#define INF (int)1e9
-#define EPS 1e-9
-#define Nmax (int)1e3+2
-#define LgMax 20
+const int dx[] = { -1, 0, 1, 0 };
+const int dy[] = { 0, 1, 0, -1 };
 
 const int dl[] = { -1, -1, -1,  0, 0,  1, 1, 1 };
 const int dc[] = { -1,  0,  1, -1, 1, -1, 0, 1 };
+
+const int INF = 1e9;
+const double EPS = 1e-9;
+
+const int Nmax = 1e3 + 2;
+const int LgMax = log2(Nmax) + 1;
 
 using namespace std;
 
