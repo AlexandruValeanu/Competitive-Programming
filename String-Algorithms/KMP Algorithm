@@ -13,7 +13,7 @@ int pi[Lmax], d[Lmax];
 int P, T;
 
 /// pi[i] = longest prefix of Pattern[1...i] which is also suffix of Pattern[1...i]
-///  d[i] = longest prefix of Pattern[1...P] which is also suffix of Text[1...T]
+///  d[i] = longest prefix of Pattern[1...P] which is also suffix of Text[1...i]
 
 void build_prefix()
 {
