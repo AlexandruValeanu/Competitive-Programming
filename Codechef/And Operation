@@ -89,78 +89,43 @@ const int LgMax = log2(Nmax) + 1;
 using namespace std;
 
 int V[Nmax];
-int N, maxim;
+int use[Nmax];
+int N;
 
-struct Trie
+int rec( int b, int lev )
 {
-    int val;
-    Trie *son[2];
+    if ( b == -1 ) return 0;
 
-    Trie()
+    int valid = 0;
+
+    for ( int i = 1; i <= N; ++i )
     {
-        son[0] = 0;
-        son[1] = 0;
-        val = 0;
-    }
-};
-
-Trie *T = new Trie;
-
-void insereaza( Trie *nod, int sum, int exp )
-{
-    if ( exp == -1 )
-    {
-        nod->val = sum;
-        return;
+        if ( use[i] == lev && bit( V[i], b ) )
+            valid++;
     }
 
-    bool t = ( sum & ( 1 << exp ) );
+    if ( valid >= 2 )
+    {
+        for ( int i = 1; i <= N; ++i )
+        {
+            if ( use[i] == lev && bit( V[i], b ) )
+                use[i]++;
+        }
 
-    if ( nod -> son[t] == 0 )
-        nod -> son[t] = new Trie;
-
-    insereaza ( nod -> son[t], sum, exp - 1 );
+        return ( 1 << b ) + rec( b - 1, lev + 1 );
+    }
+    else
+        return rec( b - 1, lev );
 }
-
-void query( int sum )
-{
-    Trie *nod = T;
-
-    for ( int i = 31 ; i >= 0 ; --i )
-    {
-        bool t = ( sum & ( 1 << i ) );
-
-        if ( nod -> son[t] )
-                nod = nod -> son[t];
-        else
-                nod = nod -> son[t ^ 1];
-    }
-
-    if ( ( sum & nod->val ) > maxim )
-    {
-        maxim = sum & nod->val;
-    }
-}
-
 
 int main()
 {
-    ///FIN("data.in");
-
     read( N );
 
     for ( int i = 1; i <= N; ++i )
         read( V[i] );
 
-    insereaza( T, 0, 31 );
-
-    for ( int i = 1; i <= N; ++i )
-    {
-        query( V[i] );
-        insereaza( T, V[i], 31 );
-    }
-
-    write( maxim );
+    write( rec( 31, 0 ) );
 
     return 0;
 }
