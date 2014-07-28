@@ -224,7 +224,6 @@ int find( Treap *T, int key )
 
 int Kth( Treap *T, int position )
 {
-    if ( position > T->nr_nodes )          return -INF;
     if ( T->st->nr_nodes + 1 == position ) return T->key;
     if ( position <= T->st->nr_nodes )     return Kth( T->st, position );
     else                                   return Kth( T->dr, position - 1 - T->st->nr_nodes );
@@ -267,13 +266,11 @@ int main()
 
         if ( type == 'K' )
         {
-            int k = Kth( root, val );
-
-            if ( k == -INF )
+            if ( val > root->nr_nodes )
                 puts("invalid");
             else
             {
-                write( k );
+                write( Kth( root, val ) );
                 putchar( '\n' );
             }
         }
