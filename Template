@@ -36,14 +36,14 @@ inline void read( int &a )
 
     do
     {
-        ch = getchar_unlocked();
+        ch = getchar();
 
     } while ( !isdigit( ch ) );
 
     do
     {
         a = a * 10 + ch - '0';
-        ch = getchar_unlocked();
+        ch = getchar();
 
     } while( isdigit( ch ) );
 }
@@ -68,9 +68,9 @@ inline void write( int a )
     i--;
 
     if ( sign == -1 )
-        putchar_unlocked( '-' );
+        putchar( '-' );
 
-    while ( i >= 0 ) putchar_unlocked( s[ i-- ] );
+    while ( i >= 0 ) putchar( s[ i-- ] );
 }
 
 const int dx[] = { -1, 0, 1, 0 };
