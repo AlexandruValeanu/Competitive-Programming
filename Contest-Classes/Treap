@@ -1,40 +1,118 @@
-#include <iostream>
-#include <fstream>
-#include <cstdlib>
-#include <ctime>
+#include <bits/stdc++.h>
+
+#define VI vector<int>
+#define VII vector<pair<int,int>>
+#define QI queue<int>
+
+#define ms(a,v) memset( a, v, sizeof( a ) )
+#define FOR(i,a,b) for(int i = a; i <= b; ++i)
+#define ROF(i,a,b) for(int i = a; i >= b; i--)
+#define foreach(v, c) for( typeof( (c).begin() ) v = (c).begin(); v != (c).end(); ++v)
+
+#define pb push_back
+#define pp pair<int,int>
+#define mp make_pair
+#define fi first
+#define se second
+
+#define popcount __builtin_popcount
+#define gcd __gcd
+#define bit(n,i) ( n & ( 1 << i ) )
+#define lsb(x) ( x & ( -x ) )
+
+#define FIN(str) freopen(str,"r",stdin)
+#define FOUT(str) freopen(str,"w",stdout)
+#define Fin(str) ifstream(str)
+#define Fout(str) ostream(str)
+#define SYNC ios_base::sync_with_stdio(0);
+
+#define ll long long
+#define ull unsigned long long
+
+inline void read( int &a )
+{
+    register char ch;
+    a = 0;
+
+    do
+    {
+        ch = getchar();
+
+    } while ( !isdigit( ch ) );
+
+    do
+    {
+        a = a * 10 + ch - '0';
+        ch = getchar();
+
+    } while( isdigit( ch ) );
+}
+
+inline void write( int a )
+{
+    char s[20];
+    int i = 0;
+    int sign = 1;
+
+    if ( a < 0 )
+        sign = -1,
+        a = -a;
+
+    do
+    {
+        s[ i++ ] = a % 10 + '0';
+        a /= 10;
+
+    } while ( a );
+
+    i--;
+
+    if ( sign == -1 )
+        putchar( '-' );
+
+    while ( i >= 0 ) putchar( s[ i-- ] );
+}
+
+const int dx[] = { -1, 0, 1, 0 };
+const int dy[] = { 0, 1, 0, -1 };
+
+const int dl[] = { -1, -1, -1, 0, 0, 1, 1, 1 };
+const int dc[] = { -1, 0, 1, -1, 1, -1, 0, 1 };
+
+const int INF = 2e9;
+const double EPS = 1e-9;
+
+const int Nmax = 1e4 + 2;
+
+const int LgMax = log2(Nmax) + 1;
 
 using namespace std;
 
-class Treap
-{
-public:
+typedef int Type;
 
-    int key;
-    int priority;
-    int nr_nodes;
+struct Treap
+{
+    int priority, nr_nodes;
+    Type key;
 
     Treap *st, *dr;
 
-    Treap()
-    {
-        key = priority = nr_nodes = 0;
-        st = dr = NULL;
-    }
-
-    Treap( int _key, int _priority, int _nr_nodes, Treap *_st, Treap *_dr )
+    Treap( const Type _key, const int _priority, const int _nr_nodes, Treap *_st, Treap *_dr )
     {
         key = _key;
         priority = _priority;
+        nr_nodes = _nr_nodes;
         st = _st;
         dr = _dr;
     }
+};
 
-} *root, *NIL;
+Treap *NIL, *root;
 
 void initTreap()
 {
     srand( time( NULL ) );
-    NIL = new Treap( 0, 0, 0, NULL, NULL );
+    NIL = new Treap( Type(), 0, 0, NULL, NULL );
     root = NIL;
 }
 
@@ -78,25 +156,25 @@ void balance( Treap *&T )
     update( T );
 }
 
-void insert( Treap *&T, int key, int priority = rand() + 1 )
+void insert( Treap *&T, Type key, int p = rand() + 1 )
 {
     if ( T == NIL )
     {
-        T = new Treap( key, priority, 1, NIL, NIL );
+        T = new Treap( key, p, 1, NIL, NIL );
     }
     else
     {
         if ( key < T->key )
-            insert( T->st, key, priority );
+            insert( T->st, key, p );
         else
             if ( key > T->key )
-                insert( T->dr, key, priority );
+                insert( T->dr, key, p );
 
         balance( T );
     }
 }
 
-void erase( Treap *&T, int key )
+void erase( Treap *&T, Type key )
 {
     if ( T == NIL ) return;
 
@@ -131,25 +209,36 @@ void erase( Treap *&T, int key )
         update( T );
 }
 
-int find( Treap *T, int key )
+int find( Treap *T, Type key )
 {
     if ( T == NIL )      return 0;
-    if ( key == T->key ) return 1;
+    if ( T->key == key ) return 1;
     if ( key < T->key )  return find( T->st, key );
     else                 return find( T->dr, key );
 }
 
-int kth_element( Treap *T, int kth )
+Type Kth( Treap *T, int position )
 {
-    if ( kth > T->nr_nodes ) return -1; /// ERROR
+    if ( T->st->nr_nodes + 1 == position ) return T->key;
+    if ( position <= T->st->nr_nodes )     return Kth( T->st, position );
+    else                                   return Kth( T->dr, position - 1 - T->st->nr_nodes );
+}
 
-    if ( T->st->nr_nodes + 1 == kth ) return T->key;
+int Count( Treap* T, Type key )
+{
+    if ( T == NIL ) return 0;
 
-    if ( kth <= T->st->nr_nodes ) return kth_element( T->st, kth );
-    else                          return kth_element( T->dr, kth - 1 - T->st->nr_nodes );
+    if ( key > T->key )
+        return 1 + T->st->nr_nodes + Count( T->dr, key );
+    else
+        return Count( T->st, key );
 }
 
 int main()
 {
-    return 0;
+    FIN("data.in");
+    FOUT("data.out");
+
+    initTreap();
 }
+
