@@ -33,12 +33,19 @@ inline void read( int &a )
 {
     register char ch;
     a = 0;
+    int sign = 1;
 
     do
     {
         ch = getchar();
 
-    } while ( !isdigit( ch ) );
+    } while ( !isdigit( ch ) && ch != '-' );
+
+    if ( ch == '-' )
+    {
+        sign = -1;
+        ch = getchar();
+    }
 
     do
     {
@@ -46,6 +53,8 @@ inline void read( int &a )
         ch = getchar();
 
     } while( isdigit( ch ) );
+
+    a *= sign;
 }
 
 inline void write( int a )
