@@ -17,7 +17,7 @@
 
 #define popcount __builtin_popcount
 #define gcd __gcd
-#define bit(n,i) ( n & ( 1 << i ) )
+#define bit(n,i) ( n & ( 1LL << i ) )
 #define lsb(x) ( x & ( -x ) )
 
 #define FIN(str) freopen(str,"r",stdin)
