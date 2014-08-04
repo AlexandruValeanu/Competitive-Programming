@@ -7,34 +7,19 @@ vector<int> Z_Algorithm( const string &str )
     int L = 0, R = 0;
     int lg = str.size();
 
-    vector <int> Z( lg + 1, 0 );
+    vector <int> Z( lg, 0 );
 
     for ( int i = 1; i < lg; ++i )
     {
-        if ( i > R )
+        if ( i <= R )
+            Z[i] = min( R - i + 1, Z[i - L] );
+
+        while ( i + Z[i] < lg && str[ Z[i] ] == str[ i + Z[i] ] ) Z[i]++;
+
+        if ( i + Z[i] - 1 > R )
         {
-            L = R = i;
-
-            while ( R < lg && str[R - L] == str[R] ) R++;
-
-            R--;
-            Z[i] = R - L + 1;
-        }
-        else
-        {
-            int p = i - L;
-
-            if ( Z[p] < R - i + 1 )
-                Z[i] = Z[p];
-            else
-            {
-                L = i;
-
-                while ( R < lg && str[R - L] == str[R] ) R++;
-
-                R--;
-                Z[i] = R - L + 1;
-            }
+            L = i;
+            R = i + Z[i] - 1;
         }
     }
 
