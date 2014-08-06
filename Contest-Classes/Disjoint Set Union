@@ -1,0 +1,72 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+class DSU
+{
+public:
+
+    DSU() {}
+
+    DSU( const int _N )
+    {
+        N = _N;
+
+        Father = vector<int>( N + 1, 0 );
+        Rank = vector<int> ( N + 1, 0 );
+
+        initialise();
+    }
+
+    void initialise()
+    {
+        for ( int i = 1; i <= N; ++i )
+        {
+            Father[i] = i;
+            Rank[i] = 1;
+        }
+    }
+
+    int Find( int node )
+    {
+        int root, auxNode;
+
+        for ( root = node; Father[ root ] != root; root = Father[ root ] );
+
+        while ( node != Father[ node ] )
+        {
+            auxNode = Father[ node ];
+            Father[ node ] = root;
+            node = auxNode;
+        }
+
+        return root;
+    }
+
+    int Check( int x, int y )
+    {
+        return ( Find( x ) == Find( y ) );
+    }
+
+    void Union( int x, int y )
+    {
+        if ( Rank[x] < Rank[y] )
+            Father[x] = y;
+        else
+            Father[y] = x;
+
+        if ( Rank[x] == Rank[y] )
+            Rank[y]++;
+    }
+
+private:
+
+    vector <int> Father, Rank;
+    int N;
+};
+
+int main()
+{
+
+    return 0;
+}
