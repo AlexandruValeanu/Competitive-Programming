@@ -1,0 +1,40 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+const int Nmax = 100;
+
+int grundy[Nmax][Nmax];
+
+int mex( int x, int y )
+{
+    if ( grundy[x][y] != -1 )
+        return grundy[x][y];
+
+    if ( x == 0 && y == 0 )
+        return grundy[x][y] = 0;
+
+    unordered_set <int> Set;
+
+    for ( int a = 0; a < x; ++a )
+        for ( int b = 0; b < y; ++b )
+            Set.insert( mex( a, b ) ^ mex( a, y ) ^ mex( x, b ) );
+
+    grundy[x][y] = 0;
+
+    while ( Set.count( grundy[x][y] ) )
+        grundy[x][y]++;
+
+    return grundy[x][y];
+}
+
+int main()
+{
+    memset( grundy, -1, sizeof( grundy ) );
+
+    for ( int i = 0; i < 10; ++i, cout << endl )
+        for ( int j = 0; j < 10; ++j )
+            cout << mex( i, j ) << " ";
+
+    return 0;
+}
