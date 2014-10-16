@@ -1,0 +1,72 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+class LinearProbing
+{
+public:
+
+    LinearProbing()
+    {
+        data = new int[PW];
+
+        for ( int i = 0; i < PW; ++i )
+            data[i] = EMPTY;
+    }
+
+    ~LinearProbing()
+    {
+        delete [] data;
+    }
+
+    void insert( const int value )
+    {
+        for ( int i = ( ( value & MOD ) * PRIME ) & MOD; ; i = ( i + 1 ) & MOD )
+        {
+            if ( data[i] == EMPTY || data[i] == ERASED )
+            {
+                data[i] = value;
+                break;
+            }
+        }
+    }
+
+    void erase( const int value )
+    {
+        for ( int i = ( ( value & MOD ) * PRIME ) & MOD; data[i] != EMPTY; i = ( i + 1 ) & MOD )
+        {
+            if ( data[i] == value )
+            {
+                data[i] = ERASED;
+                break;
+            }
+        }
+    }
+
+    bool find( const int value ) const
+    {
+        for ( int i = ( ( value & MOD ) * PRIME ) & MOD; data[i] != EMPTY; i = ( i + 1 ) & MOD )
+        {
+            if ( data[i] == value )
+                return true;
+        }
+
+        return false;
+    }
+
+private:
+
+    static const int PW = ( 1 << 21 );
+    static const int MOD = PW - 1;
+    static const int PRIME = 97;
+
+    static const int EMPTY = -1;
+    static const int ERASED = -2;
+
+    int *data;
+};
+
+int main()
+{
+    return 0;
+}
