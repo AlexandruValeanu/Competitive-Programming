@@ -1,0 +1,70 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+class MinHeap
+{
+public:
+
+    MinHeap()
+    {
+        heap = vector<int>( 1, 0 );
+        heapSize = 0;
+    }
+
+    void insertHeap( const int val )
+    {
+        heap.push_back( val );
+        UpHeap( ++heapSize );
+    }
+
+    int eraseHeap()
+    {
+        int val = heap[1];
+
+        heap[1] = heap.back();
+        heap.pop_back();
+        heapSize--;
+
+        DownHeap( 1 );
+
+        return val;
+    }
+
+private:
+
+    vector<int> heap;
+    int heapSize;
+
+    void UpHeap( int nod )
+    {
+        while ( nod > 1 && heap[nod / 2] > heap[nod] )
+        {
+            swap( heap[nod / 2], heap[nod] );
+            nod /= 2;
+        }
+    }
+
+    void DownHeap( int nod )
+    {
+        while ( 2 * nod <= heapSize )
+        {
+            int pos = 2 * nod;
+
+            if ( 2 * nod + 1 <= heapSize && heap[2 * nod + 1] < heap[2 * nod] )
+                pos = 2 * nod + 1;
+
+            if ( heap[nod] <= heap[pos] )
+                break;
+
+            swap( heap[nod], heap[pos] );
+
+            nod = pos;
+        }
+    }
+};
+
+int main()
+{
+    return 0;
+}
