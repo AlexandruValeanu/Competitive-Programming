@@ -6,8 +6,6 @@ class DSU
 {
 public:
 
-    DSU() {}
-
     DSU( const int _N )
     {
         N = _N;
@@ -29,11 +27,12 @@ public:
 
     int Find( int node )
     {
-        int root, auxNode;
+        int root = node, auxNode;
 
-        for ( root = node; Father[ root ] != root; root = Father[ root ] );
+        while ( Father[ root ] != root )
+            root = Father[ root ];
 
-        while ( node != Father[ node ] )
+        while ( root != Father[ node ] )
         {
             auxNode = Father[ node ];
             Father[ node ] = root;
@@ -50,13 +49,21 @@ public:
 
     void Union( int x, int y )
     {
-        if ( Rank[x] < Rank[y] )
-            Father[x] = y;
-        else
-            Father[y] = x;
+        int fx = Find( x );
+        int fy = Find( y );
 
-        if ( Rank[x] == Rank[y] )
-            Rank[y]++;
+        if ( fx != fy )
+        {
+            x = fx; y = fy;
+
+            if ( Rank[x] < Rank[y] )
+                Father[x] = y;
+            else
+                Father[y] = x;
+
+            if ( Rank[x] == Rank[y] )
+                Rank[y]++;
+        }
     }
 
 private:
@@ -67,6 +74,5 @@ private:
 
 int main()
 {
-
     return 0;
 }
