@@ -1,0 +1,110 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+struct Complex
+{
+    double re, im;
+
+    Complex( double a = 0.0, double b = 0.0 ): re( a ), im( b )
+    {
+    }
+
+    double& real()
+    {
+        return re;
+    }
+
+    double& imag()
+    {
+        return im;
+    }
+
+    Complex& operator += ( const Complex& c )
+    {
+        this->re += c.re;
+        this->im += c.im;
+
+        return *this;
+    }
+
+    Complex operator + ( const Complex& c ) const
+    {
+        Complex aux = *this;
+        aux += c;
+
+        return aux;
+    }
+
+    Complex& operator -= ( const Complex& c )
+    {
+        this->re -= c.re;
+        this->im -= c.im;
+
+        return *this;
+    }
+
+    Complex operator - ( const Complex& c ) const
+    {
+        Complex aux = *this;
+        aux -= c;
+
+        return aux;
+    }
+
+    Complex& operator *= ( const Complex& c )
+    {
+        double auxRe = this->re * c.re - this->im * c.im;
+        double auxIm = this->re * c.im + this->im * c.re;
+
+        this->re = auxRe;
+        this->im = auxIm;
+
+        return *this;
+    }
+
+    Complex operator * ( const Complex& c ) const
+    {
+        Complex aux = *this;
+        aux *= c;
+
+        return aux;
+    }
+
+    Complex& operator /= ( const Complex& c )
+    {
+        double a = this->re * c.re + this->im * c.im;
+        double b = this->im * c.re - this->re * c.im;
+        double d = c.re * c.re + c.im * c.im;
+
+        this->re = a / d;
+        this->im = b / d;
+
+        return *this;
+    }
+
+    Complex operator / ( const Complex& c ) const
+    {
+        Complex aux = *this;
+        aux /= c;
+
+        return aux;
+    }
+
+    friend istream& operator >> ( istream& stream, Complex& C )
+    {
+        stream >> C.re >> C.im;
+        return stream;
+    }
+
+    friend ostream& operator << ( ostream& stream, const Complex& C )
+    {
+        stream << C.re << " " << C.im;
+        return stream;
+    }
+};
+
+int main()
+{
+    return 0;
+}
