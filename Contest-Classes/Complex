@@ -20,6 +20,11 @@ struct Complex
         return im;
     }
 
+    void conj()
+    {
+        this->im = -this->im;
+    }
+
     Complex& operator += ( const Complex& c )
     {
         this->re += c.re;
