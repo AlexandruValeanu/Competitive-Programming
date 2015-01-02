@@ -51,24 +51,26 @@ namespace FFT
                 swap( coef[i], coef[j] );
         }
 
-        for ( int i = 1; i <= expTwo; ++i )
+        for ( int len = 2; len <= powerOfTwo; len *= 2 )
         {
-            Complex w = polar( 1.0, inverse * 2.0 * PI / ( 1 << i ) );
+            int step = len / 2;
+
+            Complex root = polar( 1.0, inverse * 2.0 * PI / len );
             Complex wk = Complex( 1, 0 );
-            int step = 1 << ( i - 1 );
 
-            for ( int k = 0; k < step; ++k )
+            for ( int i = 0; i < powerOfTwo; i += 2 * step )
             {
-                for ( int j = 0; j < powerOfTwo; j += 2 * step )
+                wk = Complex( 1, 0 );
+
+                for ( int j = 0; j < step; ++j )
                 {
-                    Complex a = coef[j | k];
-                    Complex b = wk * coef[j | k | step];
+                    Complex x = coef[i + j], y = coef[i + j + step] * wk;
 
-                    coef[j | k]        = a + b;
-                    coef[j | k | step] = a - b;
+                    coef[i + j] = x + y;
+                    coef[i + j + step] = x - y;
+
+                    wk = wk * root;
                 }
-
-                wk = wk * w;
             }
         }
 
