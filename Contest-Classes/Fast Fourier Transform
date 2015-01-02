@@ -7,7 +7,6 @@ typedef complex<double> Complex;
 namespace FFT
 {
     const int Nmax = ( 1 << 18 );
-    const int CUT_OFF = 400000;
     const double PI = 3.141592653589793238460;
     const double EPS = 1e-10;
 
@@ -83,46 +82,33 @@ namespace FFT
 
     void convolution( Complex a[], Complex b[], Complex c[], int lgA, int lgB, int &lgC )
     {
-        if ( 1LL * lgA * lgB <= CUT_OFF )
-        {
-            lgC = lgA + lgB - 1;
+        for ( expTwo = 0; ( 1 << expTwo ) < 2 * max( lgA, lgB ); ++expTwo );
 
-            clearArray( c, lgC );
+        powerOfTwo = ( 1 << expTwo );
 
-            for ( int i = 0; i < lgA; ++i )
-                for ( int j = 0; j < lgB; ++j )
-                    c[i + j] += a[i] * b[j];
-        }
-        else
-        {
-            for ( expTwo = 0; ( 1 << expTwo ) < 2 * max( lgA, lgB ); ++expTwo );
+        for ( int i = 0; i < lgA; ++i )
+            A[i] = a[i];
 
-            powerOfTwo = ( 1 << expTwo );
+        for ( int i = 0; i < lgB; ++i )
+            B[i] = b[i];
 
-            for ( int i = 0; i < lgA; ++i )
-                A[i] = a[i];
+        padd( A, lgA );
+        padd( B, lgB );
 
-            for ( int i = 0; i < lgB; ++i )
-                B[i] = b[i];
+        fft( A, 1 );
+        fft( B, 1 );
 
-            padd( A, lgA );
-            padd( B, lgB );
+        for ( int i = 0; i < powerOfTwo; ++i )
+            C[i] = A[i] * B[i];
 
-            fft( A, 1 );
-            fft( B, 1 );
+        fft( C, -1 );
 
-            for ( int i = 0; i < powerOfTwo; ++i )
-                C[i] = A[i] * B[i];
+        lgC = powerOfTwo;
 
-            fft( C, -1 );
+        while ( lgC >= 2 && abs( C[lgC - 1] ) < EPS ) lgC--;
 
-            lgC = powerOfTwo;
-
-            while ( lgC >= 2 && abs( C[lgC - 1] ) < EPS ) lgC--;
-
-            for ( int i = 0; i < lgC; ++i )
-                c[i] = C[i];
-        }
+        for ( int i = 0; i < lgC; ++i )
+            c[i] = C[i];
     }
 }
 
