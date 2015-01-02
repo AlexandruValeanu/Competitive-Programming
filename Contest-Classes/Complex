@@ -25,6 +25,17 @@ struct Complex
         this->im = -this->im;
     }
 
+    double abs()
+    {
+        return sqrt( this->re * this->re + this->im * this->im );
+    }
+
+    void polar( const double rho, const double theta )
+    {
+        this->re = rho * cos( theta );
+        this->im = rho * sin( theta );
+    }
+
     Complex& operator += ( const Complex& c )
     {
         this->re += c.re;
