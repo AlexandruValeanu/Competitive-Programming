@@ -1,177 +1,94 @@
 #include <bits/stdc++.h>
 
-#define VI vector<int>
-#define VII vector<pair<int,int>>
-#define QI queue<int>
-
-#define ms(a,v) memset( a, v, sizeof( a ) )
-#define FOR(i,a,b) for(int i = a; i <= b; ++i)
-#define ROF(i,a,b) for(int i = a; i >= b; i--)
-#define foreach(v, c) for( typeof( (c).begin() ) v = (c).begin(); v != (c).end(); ++v)
-
-#define pb push_back
-#define pp pair<int,int>
-#define mp make_pair
-#define fi first
-#define se second
-
-#define popcount __builtin_popcount
-#define gcd __gcd
-#define bit(n,i) ( n & ( 1LL << i ) )
-#define lsb(x) ( x & ( -x ) )
-
-#define FIN(str) freopen(str,"r",stdin)
-#define FOUT(str) freopen(str,"w",stdout)
-#define Fin(str) ifstream(str)
-#define Fout(str) ostream(str)
-#define SYNC ios_base::sync_with_stdio(0);
-
-#define ll long long
-#define ull unsigned long long
-
-inline void read( int &a )
-{
-    register char ch;
-    a = 0;
-    int sign = 1;
-
-    do
-    {
-        ch = getchar();
-
-    } while ( !isdigit( ch ) && ch != '-' );
-
-    if ( ch == '-' )
-    {
-        sign = -1;
-        ch = getchar();
-    }
-
-    do
-    {
-        a = a * 10 + ch - '0';
-        ch = getchar();
-
-    } while( isdigit( ch ) );
-
-    a *= sign;
-}
-
-inline void write( int a )
-{
-    char s[20];
-    int i = 0;
-    int sign = 1;
-
-    if ( a < 0 )
-        sign = -1,
-        a = -a;
-
-    do
-    {
-        s[ i++ ] = a % 10 + '0';
-        a /= 10;
-
-    } while ( a );
-
-    i--;
-
-    if ( sign == -1 )
-        putchar( '-' );
-
-    while ( i >= 0 ) putchar( s[ i-- ] );
-}
-
-const int dx[] = { -1, 0, 1, 0 };
-const int dy[] = { 0, 1, 0, -1 };
-
-const int dl[] = { -1, -1, -1, 0, 0, 1, 1, 1 };
-const int dc[] = { -1, 0, 1, -1, 1, -1, 0, 1 };
-
-const int INF = 2e9;
-const double EPS = 1e-9;
-
-const int Nmax = 1e5 + 2;
-
-const int LgMax = log2(Nmax) + 1;
-
 using namespace std;
 
-const int MOD = 1000000007;
+const int Nmax = 100000 + 1;
+const int MOD = 1e9 + 7;
 
-int colur[Nmax];
-int vis[Nmax];
-int black[Nmax], tata[Nmax];
-int DP[2][Nmax];
-
-int N, K;
-
-VI G[Nmax];
-
-void DFS( int nod )
+struct Lista
 {
-    vis[nod] = 1;
+    int nod;
+    int urm;
+};
 
-    for ( auto x: G[nod] )
+Lista G[2 * Nmax];
+int vecini[Nmax];
+
+int special[Nmax];
+int dp[Nmax][2]; /// 0 - din subarbore
+
+int N, K, contor;
+
+void addEdge(int x, int y)
+{
+    contor++;
+    G[contor].nod = y;
+    G[contor].urm = vecini[x];
+    vecini[x] = contor;
+}
+
+int pw(int a, int p)
+{
+    int res = 1;
+    assert( a > 0 );
+
+    while ( p )
     {
-        if ( !vis[x] )
+        if ( p & 1 )
+            res = ( 1LL *res * a ) % MOD;
+
+        p >>= 1;
+        a = ( 1LL * a * a ) % MOD;
+    }
+
+    return res;
+}
+
+void DFS(int nod, int tata)
+{
+    dp[nod][1] = 1;
+
+    for ( int p = vecini[nod]; p; p = G[p].urm )
+    {
+        int fiu = G[p].nod;
+
+        if ( fiu != tata )
         {
-            vis[x] = 1;
-            tata[x] = nod;
-            DFS( x );
+            DFS(fiu, nod);
+            dp[nod][1] = ( 1LL * dp[nod][1] * ( dp[fiu][0] + dp[fiu][1] ) ) % MOD;
         }
     }
 
-    if ( G[nod].size() == 0 )
+    if ( special[nod] )
     {
-        if ( black[nod] == 1 )
-        {
-            DP[0][nod] = 0;
-            DP[1][nod] = 1;
-        }
-        else
-        {
-            DP[0][nod] = 1;
-            DP[1][nod] = 0;
-        }
+        dp[nod][0] = dp[nod][1];
+        dp[nod][1] = 0;
     }
     else
     {
-        vector <int> dp[2];
-        dp[0].resize( G[nod].size() + 1 );
-        dp[1].resize( G[nod].size() + 1 );
+        int produsPrecalculat = dp[nod][1];
 
-        dp[0][0] = 1;
-        dp[1][0] = 0;
-        int nrSons = 0;
-
-        for ( auto x: G[nod] )
+        for ( int p = vecini[nod]; p; p = G[p].urm )
         {
-            if ( tata[x] == nod )
+            int fiu = G[p].nod;
+
+            if ( fiu != tata )
             {
-                nrSons++;
-                dp[0][nrSons] = ( 1LL * dp[0][nrSons - 1] * ( DP[0][x] + DP[1][x] ) ) % MOD;
-                dp[1][nrSons] = ( 1LL * dp[0][nrSons - 1] * DP[1][x] + 1LL * dp[1][nrSons - 1] * ( DP[0][x] + DP[1][x] ) ) % MOD;
-            }
-        }
+                int sol = produsPrecalculat;
+                sol = ( 1LL * sol * pw(dp[fiu][0] + dp[fiu][1], MOD - 2) ) % MOD;
+                sol = ( 1LL * sol * dp[fiu][0] ) % MOD;
 
-        if ( black[nod] )
-        {
-            DP[0][nod] = 0;
-            DP[1][nod] = dp[0][nrSons];
-        }
-        else
-        {
-            DP[0][nod] = dp[0][nrSons];
-            DP[1][nod] = dp[1][nrSons];
+                dp[nod][0] = ( dp[nod][0] + sol ) % MOD;
+            }
         }
     }
 }
 
 int main()
 {
-    ///FIN("data.in");
-    ///FOUT("data.out");
+    ///ifstream cin("karb2.in");
+
+    ios_base::sync_with_stdio( false );
 
     cin >> N;
 
@@ -184,25 +101,16 @@ int main()
 
         x++; y++;
 
-        G[x].pb( y );
-        G[y].pb( x );
+        addEdge(x, y);
+        addEdge(y, x);
     }
 
     for ( int i = 1; i <= N; ++i )
-        cin >> colur[i];
+        cin >> special[i];
 
-    for ( int i = 1; i <= N; ++i )
-    {
-        if ( colur[i] )
-        {
-            K++;
-            black[i] = 1;
-        }
-    }
+    DFS(1, 0);
 
-    DFS( 1 );
-
-    cout << DP[1][1];
+    cout << dp[1][0] << "\n";
 
     return 0;
 }
