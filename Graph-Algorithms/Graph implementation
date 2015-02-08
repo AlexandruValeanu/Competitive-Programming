@@ -1,0 +1,40 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+const int Vmax = 100000 + 1;
+const int Emax = 200000 + 1;
+
+struct Graph
+{
+    struct Node
+    {
+        int nod;
+        int urm;
+    };
+
+    Node G[Emax];
+    int vecini[Vmax];
+    int contor;
+
+    Graph()
+    {
+        contor = 0;
+
+        for ( int i = 0; i < Vmax; ++i )
+            vecini[i] = 0;
+    }
+
+    void addEdge( int a, int b )
+    {
+        contor++;
+        G[contor].nod = b;
+        G[contor].urm = vecini[a];
+        vecini[a] = contor;
+    }
+};
+
+int main()
+{
+    return 0;
+}
