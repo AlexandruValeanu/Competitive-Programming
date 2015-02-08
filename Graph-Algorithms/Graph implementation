@@ -10,10 +10,10 @@ struct Graph
     struct Node
     {
         int nod;
-        int urm;
+        int next;
     };
 
-    Node G[Emax];
+    Node listEdges[Emax];
     int head[Vmax];
     int contor;
 
@@ -28,8 +28,8 @@ struct Graph
     void addEdge( int a, int b )
     {
         contor++;
-        G[contor].nod = b;
-        G[contor].urm = head[a];
+        listEdges[contor].nod = b;
+        listEdges[contor].next = head[a];
         head[a] = contor;
     }
 };
