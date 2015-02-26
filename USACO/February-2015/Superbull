@@ -1,0 +1,51 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+const int Nmax = 2000 + 1;
+const int INF = (1 << 30);
+
+int v[Nmax];
+int dist[Nmax], vis[Nmax];
+int N;
+
+int main()
+{
+    ifstream in("superbull.in");
+    ofstream out("superbull.out");
+
+    in >> N;
+
+    for ( int i = 1; i <= N; ++i )
+        in >> v[i];
+
+    for ( int i = 0; i <= N; ++i )
+        dist[i] = -INF;
+
+    dist[1] = 0;
+    long long sum = 0;
+
+    for ( int i = 1; i <= N; ++i )
+    {
+        int root = 0;
+        int best = -INF;
+
+        for ( int j = 1; j <= N; ++j )
+            if ( vis[j] == 0 && dist[j] > best )
+            {
+                root = j;
+                best = dist[j];
+            }
+
+        vis[root] = 1;
+        sum += dist[root];
+
+        for ( int j = 1; j <= N; ++j )
+            if ( vis[j] == 0 )
+                dist[j] = max(dist[j], v[root] ^ v[j]);
+    }
+
+    out << sum << "\n";
+
+    return 0;
+}
