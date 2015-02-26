@@ -1,0 +1,40 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+const int Nmax = 100 + 1;
+const int MOD = 1000000007;
+
+int dp[Nmax][Nmax];
+int A[Nmax][Nmax];
+
+int N, M, K;
+
+int main()
+{
+    ifstream in("hopscotch.in");
+    ofstream out("hopscotch.out");
+
+    ios_base::sync_with_stdio(false);
+
+    in >> N >> M >> K;
+
+    for ( int i = 1; i <= N; ++i )
+        for ( int j = 1; j <= M; ++j )
+            in >> A[i][j];
+
+    dp[N][M] = 1;
+
+    for ( int i = N; i >= 1; i-- )
+        for ( int j = M; j >= 1; j-- )
+        {
+            for ( int l = i + 1; l <= N; ++l )
+                for ( int c = j + 1; c <= N; ++c )
+                    if ( A[l][c] != A[i][j] )
+                        dp[i][j] = (dp[i][j] + dp[l][c]) % MOD;
+        }
+
+    out << dp[1][1] << "\n";
+
+    return 0;
+}
