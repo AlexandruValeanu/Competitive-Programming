@@ -65,7 +65,7 @@ void reduce_row()
                 double z = A[i][j];
 
                 for ( int k = 1; k <= 2 * N; ++k )
-                    A[i][k] -= z * A[i + 1][k];
+                    A[i][k] -= z * A[j][k];
             }
 }
 
