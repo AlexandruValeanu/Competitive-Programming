@@ -24,7 +24,7 @@ void gaussian()
         {
             if ( A[k][j] > EPS || A[k][j] < -EPS )
             {
-                x = j;
+                x = k;
                 break;
             }
         }
