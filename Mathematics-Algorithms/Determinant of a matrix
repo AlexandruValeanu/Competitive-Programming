@@ -27,7 +27,7 @@ double gaussian()
         if ( !x )
         {
             j++;
-            break;
+            continue;
         }
 
         swap(A[i], A[x]);
