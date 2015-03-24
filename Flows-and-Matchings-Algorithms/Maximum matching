@@ -1,74 +1,113 @@
 #include <iostream>
-#include <fstream>
-#include <cstring>
-#include <vector>
-#include <algorithm>
 
 using namespace std;
 
-const int Nmax = 1e4 + 2;
+const int Nmax = 50000 + 1;
+const int Mmax = 150000 + 1;
+const int NIL = -1;
 
-vector <int> G[Nmax];
-int st[Nmax], dr[Nmax];
+struct Edge
+{
+    int nod;
+    int urm;
+};
+
+Edge Graph[Mmax];
+int head[Nmax];
+
+int match[2 * Nmax];
 bool use[Nmax];
 
-int N, M, E;
+int V1, V2, E;
+int countEdges;
 
-bool pairup( int nod )
+void addEdge(int x, int y)
 {
-    if ( use[nod] )
+    Graph[countEdges] = {y, head[x]};
+    head[x] = countEdges;
+    countEdges++;
+}
+
+bool dfs(int nod)
+{
+    if (use[nod])
         return false;
 
     use[nod] = true;
 
-    for ( auto x: G[nod] )
-        if ( !dr[x] || pairup( dr[x] ))
+    for (int p = head[nod]; p != NIL; p = Graph[p].urm)
+    {
+        int son = Graph[p].nod;
+
+        if (!match[son])
         {
-            st[nod] = x;
-            dr[x] = nod;
+            match[nod] = son;
+            match[son] = nod;
+
             return true;
         }
+    }
+
+    for (int p = head[nod]; p != NIL; p = Graph[p].urm)
+    {
+        int son = Graph[p].nod;
+
+        if (dfs(match[son]))
+        {
+            match[nod] = son;
+            match[son] = nod;
+
+            return true;
+        }
+    }
 
     return false;
 }
 
-void Hopcroft_Karp()
+int Hopcroft_Karp()
 {
-    for ( int change = 1; change; )
+    bool valid;
+
+    do
     {
-        change = 0;
+        valid = false;
 
-        fill( use + 1, use + N + 1, 0 );
+        for (int i = 1; i <= V1; ++i)
+            use[i] = false;
 
-        for ( int i = 1; i <= N; ++i )
-            if ( !st[i] )
-                change |= pairup( i );
-    }
+        for (int i = 1; i <= V1; ++i)
+            if (!match[i])
+                valid |= dfs(i);
 
-    int match = 0;
+    } while (valid);
 
-    for ( int i = 1; i <= N; ++i )
-        match += ( st[i] > 0 );
+    int matching = 0;
 
-    cout << match << "\n";
+    for (int i = 1; i <= V1; ++i)
+        if (match[i])
+            matching++;
 
-    for ( int i = 1; i <= N; ++i )
-        if ( st[i] )
-            cout << i << " " << st[i] << "\n";
+    return matching;
 }
 
 int main()
 {
-    cin >> N >> M >> E;
+    ///freopen("data.in", "r", stdin);
 
-    for ( int i = 1, a, b; i <= E; ++i )
+    scanf("%d %d %d", &V1, &V2, &E);
+
+    for (int i = 1; i <= V1; ++i)
+        head[i] = NIL;
+
+    for (int i = 1; i <= E; ++i)
     {
-        cin >> a >> b;
+        int x, y;
+        scanf("%d %d", &x, &y);
 
-        G[a].push_back( b );
+        addEdge(x, V1 + y);
     }
 
-    Hopcroft_Karp();
+    printf("%d\n", Hopcroft_Karp());
 
     return 0;
 }
