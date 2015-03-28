@@ -1,0 +1,15 @@
+__author__ = 'alex'
+#bubble sort
+
+def sortare(v):
+
+    for x in range(0, len(v)):
+        for y in range(x + 1, len(v)):
+            if v[x] > v[y]:
+                aux = v[x]
+                v[x] = v[y]
+                v[y] = aux
+
+vector = map(int, raw_input().split(' '))
+sortare(vector)
+print vector
