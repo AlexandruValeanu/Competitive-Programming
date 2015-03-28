@@ -1,0 +1,26 @@
+__arrayuthor__ = 'alex'
+#quicksort
+
+def quicksort(array, left, right):
+    if right - left > 0:
+        pivot, i, j = array[(left + right) / 2], left, right
+
+        while i <= j:
+
+            while array[i] < pivot:
+                i += 1
+            while array[j] > pivot:
+                j -= 1
+
+            if i <= j:
+                array[i], array[j] = array[j], array[i]
+                i += 1
+                j -= 1
+
+        quicksort(array, left, j)
+        quicksort(array, i, right)
+
+
+vector = map(int, raw_input().split(' '))
+quicksort(vector, 0, len(vector) - 1)
+print vector
