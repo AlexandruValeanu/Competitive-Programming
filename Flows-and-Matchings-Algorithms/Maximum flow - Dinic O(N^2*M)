@@ -71,7 +71,7 @@ bool BFS(int S, int T)
     return false;
 }
 
-int Edmonds_Karp(int S, int T)
+int Dinic(int S, int T)
 {
     int flow = 0, fmin, nod;
 
@@ -128,7 +128,7 @@ int main()
         addEdge(b, a, 0);
     }
 
-    printf("%d\n", Edmonds_Karp(1, N));
+    printf("%d\n", Dinic(1, N));
 
     return 0;
 }
