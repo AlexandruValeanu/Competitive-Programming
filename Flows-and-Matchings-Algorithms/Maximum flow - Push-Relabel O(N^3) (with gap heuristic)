@@ -129,11 +129,15 @@ void discharge(int u)
 
 void initPreflow(int S, int T)
 {
+    for (int i = 0; i <= 2 * N; ++i)
+        countHeight[i] = 0;
+
     for (int i = 1; i <= N; ++i)
     {
         excess[i] = 0;
         height[i] = 0;
         pointer[i] = head[i];
+        active[i] = false;
     }
 
     height[S] = N;
@@ -172,6 +176,7 @@ int push_relabel(int S, int T)
 int main()
 {
     scanf("%d %d", &N, &M);
+
     countEdges = 0;
 
     for (int i = 1; i <= N; ++i)
