@@ -11,7 +11,6 @@ using namespace std;
     = 0 for collinear
     > 0 for clockwise (anti-trigonometric)
 **/
-
 double CCW(Point A, Point B, Point P)
 {
     return (P.x - A.x) * (B.y - A.y) - (P.y - A.y) * (B.x - A.x);
@@ -20,13 +19,18 @@ double CCW(Point A, Point B, Point P)
 /// Points in the result will be listed in counter-clockwise order.
 vector<Point> convexHull(vector<Point> &points)
 {
+    /// basic case
+    if (points.size() <= 3)
+        return points;
+
+    /// sort points after x (and after y in case of equality)
     sort(points.begin(), points.end());
 
     vector<Point> U, L; /// upper and lower hulls
 
     for (int i = 0; i < (int)points.size(); ++i)
     {
-        while (U.size() >= 2 && CCW(U[U.size() - 2], U[U.size() - 1], points[i]) >= 0)
+        while (U.size() >= 2 && CCW(U[U.size() - 2], U[U.size() - 1], points[i]) >= 0) ///clockwise turn
             U.pop_back();
 
         U.push_back(points[i]);
@@ -34,7 +38,7 @@ vector<Point> convexHull(vector<Point> &points)
 
     for (int i = (int)points.size() - 1; i >= 0; --i)
     {
-        while (L.size() >= 2 && CCW(L[L.size() - 2], L[L.size() - 1], points[i]) >= 0)
+        while (L.size() >= 2 && CCW(L[L.size() - 2], L[L.size() - 1], points[i]) >= 0) ///clockwise turn
             L.pop_back();
 
         L.push_back(points[i]);
