@@ -21,11 +21,11 @@ struct Line
     explicit Line() : a(0), b(0), c(0) {
     }
 
-    Line(Point A, Point B)
+    Line(const Point& A, const Point& B)
     {
-        a = B.y - A.y;
-        b = B.x - A.x;
-        c = A.x * B.y - B.x * A.y;
+        this->a = +(B.y - A.y);
+        this->b = -(B.x - A.x);
+        this->c = -A.x * B.y + B.x * A.y;
     }
 };
 
