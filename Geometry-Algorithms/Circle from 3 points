@@ -52,8 +52,8 @@ Point lineToLineIntersection(const Line A, const Line B)
     if (abs(det) < EPS) /// det == 0
         throw invalid_argument("lines do not intersect");
 
-    double x = (A.c * B.b - A.b * B.c) / det;
-    double y = (A.a * B.c - A.c * B.a) / det;
+    double x = -(A.c * B.b - A.b * B.c) / det;
+    double y = -(A.a * B.c - A.c * B.a) / det;
 
     return Point(x, y);
 }
@@ -71,8 +71,6 @@ Circle circleFrom3Points(const Point A, const Point B, const Point C)
     Line BC = perpendicularBisector(B, C);
 
     Point center = lineToLineIntersection(AB, BC);
-    center.x *= (-1);
-    center.y *= (-1);
     double radius = dist(center, B);
 
     return {center, radius};
