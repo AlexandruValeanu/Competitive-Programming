@@ -2,6 +2,15 @@
 
 using namespace std;
 
+/**
+    Area of union of rectangles
+    -sweep line technique
+    -static segment tree
+
+    Time: O(N*logMAX_C)
+    Memory: O(N+MAX_C)
+**/
+
 const int MAX_COORD = 30000;
 const int Nmax = 10000;
 
