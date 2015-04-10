@@ -9,7 +9,7 @@ public:
     explicit UnionFind(){
     }
 
-    UnionFind(const int n) : Parent(vector<int>(n + 1, 0)), Rank(vector<int>(n + 1, 0)) {
+    UnionFind(const int n) : Parent(vector<int>(n + 1)), Rank(vector<int>(n + 1)), SizeRank(vector<int>(n + 1)) {
 
         for (int i = 1; i <= n; ++i)
             MakeSet(i);
@@ -19,6 +19,7 @@ public:
     {
         Parent[x] = x;
         Rank[x] = 0;
+        Size[x] = 1;
     }
 
     int Find(int x)
@@ -36,10 +37,16 @@ public:
 
         if (x != y)
         {
+            /// append y to x
             if (Rank[x] > Rank[y])
+            {
                 Parent[y] = x;
-            else
+                Size[x] += Size[y];
+            }
+            else /// append x to y
+            {
                 Parent[x] = y;
+                Size[y] += Size[x];
 
             if (Rank[x] == Rank[y])
                 Rank[y]++;
@@ -55,6 +62,7 @@ private:
 
     vector<int> Parent;
     vector<int> Rank;
+    vector<int> Size;
 };
 
 int main()
