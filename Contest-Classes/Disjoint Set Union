@@ -2,74 +2,59 @@
 
 using namespace std;
 
-class DSU
+class UnionFind
 {
 public:
 
-    DSU( const int _N )
-    {
-        N = _N;
-
-        Father = vector<int>( N + 1, 0 );
-        Rank = vector<int> ( N + 1, 0 );
-
-        initialise();
+    explicit UnionFind(){
     }
 
-    void initialise()
+    UnionFind(const int n) : Parent(vector<int>(n + 1, 0)), Rank(vector<int>(n + 1, 0)) {
+
+        for (int i = 1; i <= n; ++i)
+            MakeSet(i);
+    }
+
+    void MakeSet(int x)
     {
-        for ( int i = 1; i <= N; ++i )
+        Parent[x] = x;
+        Rank[x] = 0;
+    }
+
+    int Find(int x)
+    {
+        if (Parent[x] != x)
+            Parent[x] = Find(Parent[x]);
+
+        return Parent[x];
+    }
+
+    void Union(int x, int y)
+    {
+        x = Find(x);
+        y = Find(y);
+
+        if (x != y)
         {
-            Father[i] = i;
-            Rank[i] = 1;
-        }
-    }
-
-    int Find( int node )
-    {
-        int root = node, auxNode;
-
-        while ( Father[ root ] != root )
-            root = Father[ root ];
-
-        while ( root != Father[ node ] )
-        {
-            auxNode = Father[ node ];
-            Father[ node ] = root;
-            node = auxNode;
-        }
-
-        return root;
-    }
-
-    int Check( int x, int y )
-    {
-        return ( Find( x ) == Find( y ) );
-    }
-
-    void Union( int x, int y )
-    {
-        int fx = Find( x );
-        int fy = Find( y );
-
-        if ( fx != fy )
-        {
-            x = fx; y = fy;
-
-            if ( Rank[x] < Rank[y] )
-                Father[x] = y;
+            if (Rank[x] > Rank[y])
+                Parent[y] = x;
             else
-                Father[y] = x;
+                Parent[x] = y;
 
-            if ( Rank[x] == Rank[y] )
+            if (Rank[x] == Rank[y])
                 Rank[y]++;
         }
     }
 
+    bool connected(int x, int y)
+    {
+        return Find(x) == Find(y);
+    }
+
 private:
 
-    vector <int> Father, Rank;
-    int N;
+    vector<int> Parent;
+    vector<int> Rank;
 };
 
 int main()
