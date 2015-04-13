@@ -24,11 +24,8 @@ public:
         if (x < 0) x = -x + N;
         if (y < 0) y = -y + N;
 
-        G[Not(x)].push_back(y);
-        GT[y].push_back(Not(x));
-
-        G[Not(y)].push_back(x);
-        GT[x].push_back(Not(y));
+        G[x].push_back(y);
+        GT[y].push_back(x);
     }
 
     void dfs(int nod)
@@ -86,31 +83,5 @@ public:
 
 int main()
 {
-    ifstream in("2sat.in");
-    ofstream out("2sat.out");
-
-    int N, M;
-    in >> N >> M;
-
-    SAT2 S(N);
-
-    while (M--)
-    {
-        int x, y;
-        in >> x >> y;
-
-        S.addEdge(x, y);
-    }
-
-    S.solve();
-
-    if (S.isSolution())
-    {
-        for (int i = 1; i <= S.N; ++i)
-            out << S.solution[i] << " ";
-    }
-    else
-        out << "-1\n";
-
     return 0;
 }
