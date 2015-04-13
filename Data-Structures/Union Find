@@ -11,7 +11,7 @@ public:
 
     UnionFind(const int n) : Parent(vector<int>(n + 1)), Rank(vector<int>(n + 1)), Size(vector<int>(n + 1)) {
 
-        nrComp = n;
+        nrComponents = n;
 
         for (int i = 1; i <= n; ++i)
             MakeSet(i);
@@ -54,7 +54,7 @@ public:
             if (Rank[x] == Rank[y])
                 Rank[y]++;
 
-            nrComp--;
+            nrComponents--;
         }
     }
 
@@ -63,7 +63,12 @@ public:
         return Find(x) == Find(y);
     }
 
-    int nrComp;
+    int sizeComponent(int x)
+    {
+        return Size[Find(x)];
+    }
+
+    int nrComponents;
 
 private:
 
