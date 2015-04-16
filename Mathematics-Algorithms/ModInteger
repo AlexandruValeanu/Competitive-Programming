@@ -1,0 +1,129 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+
+template <unsigned int MOD> /// MOD is prime, 2 * MOD <= range of type
+class ModInteger
+{
+private:
+
+    unsigned int value;
+
+public:
+
+    ModInteger() : value(0) {
+    }
+
+    ModInteger(const int &val) : value(val % MOD) {
+    }
+
+    ModInteger(const long long &val) : value(val % MOD) {
+    }
+
+    ModInteger(const unsigned short &val) : value(val % MOD) {
+    }
+
+    ModInteger(const unsigned int &val) : value(val % MOD) {
+    }
+
+    ModInteger(const unsigned long long &val) : value(val % MOD) {
+    }
+
+    ModInteger(const ModInteger &M) : value(M.value) {
+    }
+
+    ModInteger& operator = (const ModInteger &M)
+    {
+        this->value = M.value;
+        return *this;
+    }
+
+    unsigned int getValue() const
+    {
+        return this->value;
+    }
+
+    ModInteger operator + (const ModInteger &M) const
+    {
+        return ModInteger(*this + M.value);
+    }
+
+    ModInteger& operator += (const ModInteger &M)
+    {
+        *this = *this + M;
+        return *this;
+    }
+
+    ModInteger operator - (const ModInteger &M) const
+    {
+        return ModInteger(*this + MOD - value);
+    }
+
+    ModInteger& operator -= (const ModInteger &M)
+    {
+        *this = *this - M;
+        return *this;
+    }
+
+    ModInteger operator * (const ModInteger &M) const
+    {
+        return ModInteger(1ULL * this->value * M.value);
+    }
+
+    ModInteger& operator *= (const ModInteger &M)
+    {
+        *this = *this * M;
+        return *this;
+    }
+
+    ModInteger operator / (const ModInteger &M) const
+    {
+        return ModInteger(1ULL * this->value * M.inverse());
+    }
+
+    ModInteger& operator /= (const ModInteger &M)
+    {
+        *this = *this / M;
+        return *this;
+    }
+
+    unsigned int power(unsigned int exp) const
+    {
+        unsigned int sol = 1;
+        unsigned int a = this->value;
+
+        while (exp)
+        {
+            if (exp & 1)
+                sol = (1ULL * a * sol) % MOD;
+
+            a = (1ULL * a * a) % MOD;
+            exp >>= 1;
+        }
+
+        return sol;
+    }
+
+    unsigned int inverse() const
+    {
+        return power(MOD - 2);
+    }
+
+    friend istream& operator >> (istream& stream, ModInteger<MOD> &M)
+    {
+        stream >> M.value;
+        return stream;
+    }
+
+    friend ostream& operator << (ostream& stream, const ModInteger<MOD> &M)
+    {
+        stream << M.value;
+        return stream;
+    }
+};
+
+int main()
+{
+    return 0;
+}
