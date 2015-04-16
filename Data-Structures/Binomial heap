@@ -257,13 +257,14 @@ private:
 public:
 
     /**
-     * Operation             | Runtime
-     * ----------------------+----------
-     * Create empty heap     | O(1)
-     * Insert single element | O(lg N)
-     * Query min value       | O(1)
-     * Merge heaps           | O(lg N)
-     * Delete min            | Θ(lg N)
+      Operation             | Runtime
+      ----------------------+----------
+       Decrease key         | Θ(log N)
+       Delete               | Θ(log N)
+       Extract minimum      | Θ(log N)
+       Find minimum         | O(1)
+       Insert               | O(log N)
+       Union                | Θ(log N)
 
       Memory: ~26 bytes/node
     */
