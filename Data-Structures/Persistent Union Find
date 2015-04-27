@@ -1,0 +1,98 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+class Persistent_UnionFind
+{
+public:
+
+    int nrComponents;
+
+    explicit Persistent_UnionFind() : nrComponents(0), Parent(), Size(), top(0), Stack() {
+    }
+
+    Persistent_UnionFind(const int n, const int nr_q) : nrComponents(0), Parent(vector<int>(n + 1)), Size(vector<int>(n + 1)),
+                                                        top(0), Stack(vector<pair<int,int>>(nr_q)) {
+        for (int i = 1; i <= n; ++i)
+            MakeSet(i);
+    }
+
+    void MakeSet(int x)
+    {
+        Parent[x] = x;
+        Size[x] = 1;
+    }
+
+    int Find(int x) const
+    {
+        if (Parent[x] != x)
+            return Find(Parent[x]);
+        else
+            return Parent[x];
+    }
+
+    void Union(int x, int y)
+    {
+        x = Find(x);
+        y = Find(y);
+
+        pair<int,int> operation = {-1, -1};
+
+        if (x != y)
+        {
+            if (Size[x] < Size[y])
+                swap(x, y);
+
+            /// append y to x
+            Size[x] += Size[y];
+            Parent[y] = x;
+
+            nrComponents--;
+            operation = {x, y}; ///x-root, y-son
+        }
+
+        Stack[top++] = operation;
+    }
+
+    void disconnect(int x, int y) /// disconned y from x
+    {
+        if (Parent[y] == x)
+        {
+            Parent[y] = y;
+            Size[x] -= Size[y];
+
+            nrComponents++;
+        }
+    }
+
+    void rollback()
+    {
+        top--;
+
+        if (Stack[top].first != -1)
+            disconnect(Stack[top].first, Stack[top].second);
+    }
+
+    bool connected(int x, int y) const
+    {
+        return Find(x) == Find(y);
+    }
+
+    int sizeComponent(int x) const
+    {
+        return Size[Find(x)];
+    }
+
+private:
+
+    vector<int> Parent;
+    vector<int> Size;
+
+    int top;
+    vector<pair<int, int>> Stack;
+};
+
+int main()
+{
+    return 0;
+}
