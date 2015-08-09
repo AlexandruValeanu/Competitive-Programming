@@ -2,118 +2,144 @@
 
 using namespace std;
 
-struct Complex
+template <typename dataType>
+class Complex
 {
-    double re, im;
+public:
 
-    Complex( double a = 0.0, double b = 0.0 ): re( a ), im( b )
-    {
+    dataType re, im;
+
+    Complex() : re(0), im(0) {
     }
 
-    double& real()
-    {
-        return re;
+    Complex (const dataType& a, const dataType& b) : re(a), im(b) {
     }
 
-    double& imag()
-    {
-        return im;
+    Complex(const complex<dataType>& c) : re(c.real()), im(c.imag()) {
     }
 
-    void conj()
+    Complex& operator = (const complex<dataType>& c)
     {
-        this->im = -this->im;
-    }
-
-    double abs()
-    {
-        return sqrt( this->re * this->re + this->im * this->im );
-    }
-
-    void polar( const double rho, const double theta )
-    {
-        this->re = rho * cos( theta );
-        this->im = rho * sin( theta );
-    }
-
-    Complex& operator += ( const Complex& c )
-    {
-        this->re += c.re;
-        this->im += c.im;
+        this->re = c.real();
+        this->im = c.imag();
 
         return *this;
     }
 
-    Complex operator + ( const Complex& c ) const
+    dataType real() const
     {
-        Complex aux = *this;
-        aux += c;
-
-        return aux;
+        return this->re;
     }
 
-    Complex& operator -= ( const Complex& c )
+    dataType imag() const
     {
-        this->re -= c.re;
-        this->im -= c.im;
+        return this->im;
+    }
 
+    void polar(const dataType& rho, const dataType& theta = 0)
+    {
+        this->re = rho * cos(theta);
+        this->im = rho * sin(theta);
+    }
+
+    Complex conj() const
+    {
+        return Complex(this->re, -this->im);
+    }
+
+    dataType norm() const
+    {
+        return sqrt(this->re * this->re + this->im * this->im);
+    }
+
+    dataType normSquared() const
+    {
+        return this->re * this->re + this->im * this->im;
+    }
+
+    Complex inverse() const
+    {
+        return this->conj() / this->normSquared();
+    }
+
+    ///BEGIN OPERATORS-------------------------------------------------------------
+    Complex operator + (const Complex<dataType>& c) const
+    {
+        return Complex(this->re + c.re, this->im + c.im);
+    }
+
+    Complex& operator += (const Complex<dataType>& c)
+    {
+        *this = *this + c;
         return *this;
     }
 
-    Complex operator - ( const Complex& c ) const
+    Complex operator - (const Complex<dataType>& c) const
     {
-        Complex aux = *this;
-        aux -= c;
-
-        return aux;
+        return Complex(this->re - c.re, this->im - c.im);
     }
 
-    Complex& operator *= ( const Complex& c )
+    Complex& operator -= (const Complex<dataType>& c)
     {
-        double auxRe = this->re * c.re - this->im * c.im;
-        double auxIm = this->re * c.im + this->im * c.re;
-
-        this->re = auxRe;
-        this->im = auxIm;
-
+        *this = *this + c;
         return *this;
     }
 
-    Complex operator * ( const Complex& c ) const
+    Complex operator * (const Complex<dataType>& c) const
     {
-        Complex aux = *this;
-        aux *= c;
+        double aux_re = this->re * c.real() - this->im * c.imag();
+        double aux_im = this->re * c.imag() + this->im * c.real();
 
-        return aux;
+        return Complex(aux_re, aux_im);
     }
 
-    Complex& operator /= ( const Complex& c )
+    Complex& operator *= (const Complex<dataType>& c)
     {
-        double a = this->re * c.re + this->im * c.im;
-        double b = this->im * c.re - this->re * c.im;
-        double d = c.re * c.re + c.im * c.im;
-
-        this->re = a / d;
-        this->im = b / d;
-
+        *this = *this * c;
         return *this;
     }
 
-    Complex operator / ( const Complex& c ) const
+    Complex operator * (const dataType& c) const
     {
-        Complex aux = *this;
-        aux /= c;
-
-        return aux;
+        return Complex(this->re * c, this->im * c);
     }
 
-    friend istream& operator >> ( istream& stream, Complex& C )
+    Complex& operator *= (const dataType& c)
+    {
+        *this = *this * c;
+        return *this;
+    }
+
+    Complex operator / (const Complex<dataType>& c) const
+    {
+        return *this * c.inverse();
+    }
+
+    Complex& operator /= (const Complex<dataType>& c)
+    {
+        *this = *this / c;
+        return *this;
+    }
+
+    Complex operator / (const dataType& c) const
+    {
+        return Complex(this->re / c, this->im / c);
+    }
+
+    Complex& operator /= (const dataType& c)
+    {
+        *this = *this / c;
+        return *this;
+    }
+    ///END OPERATORS--------------------------------------------------------------------
+
+    friend istream& operator >> (istream& stream, Complex& C)
     {
         stream >> C.re >> C.im;
         return stream;
     }
 
-    friend ostream& operator << ( ostream& stream, const Complex& C )
+    friend ostream& operator << (ostream& stream, const Complex& C)
     {
         stream << C.re << " " << C.im;
         return stream;
