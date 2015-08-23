@@ -1,0 +1,68 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+class LinearProbing
+{
+public:
+
+    LinearProbing()
+    {
+        table = new int[MAX_SIZE];
+
+        for ( int i = 0; i < MAX_SIZE; ++i )
+            table[i] = EMPTY;
+    }
+
+    ~LinearProbing()
+    {
+        delete[] table;
+    }
+
+    void insert(const int key)
+    {
+        int p = ((key & MOD) * PRIME) & MOD;
+
+        while (table[p] != EMPTY && table[p] != ERASED)
+            p = (p + 1) & MOD;
+
+        table[p] = key;
+    }
+
+    bool find(const int key)
+    {
+        int p = ((key & MOD) * PRIME) & MOD;
+
+        while (table[p] != EMPTY && table[p] != key)
+            p = (p + 1) & MOD;
+
+        return table[p] == key;
+    }
+
+    void erase(const int key)
+    {
+        int p = ((key & MOD) * PRIME) & MOD;
+
+        while (table[p] != EMPTY && table[p] != key)
+            p = (p + 1) & MOD;
+
+        if (table[p] == key)
+            table[p] = ERASED;
+    }
+
+private:
+
+    static const int MAX_SIZE = 1 << 20;
+    static const int MOD = MAX_SIZE - 1;
+    static const int PRIME = 137;
+
+    static const int EMPTY = -1;
+    static const int ERASED = -2;
+
+    int *table;
+};
+
+int main()
+{
+    return 0;
+}
