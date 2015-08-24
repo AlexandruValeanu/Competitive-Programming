@@ -1,0 +1,75 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+class Scanner
+{
+private:
+
+    FILE *inputFile;
+    int cursor;
+
+    static const int MAX_SIZE = 1 << 16;
+    char buffer[MAX_SIZE];
+
+    inline char getChar()
+    {
+        if (cursor == MAX_SIZE)
+        {
+            cursor = 0;
+            fread(buffer, MAX_SIZE, 1, inputFile);
+        }
+
+        return buffer[cursor++];
+    }
+
+    inline int getNr()
+    {
+        int a = 0;
+        int sign = 1;
+        char ch;
+
+        do
+        {
+            ch = getChar();
+
+        } while (!isdigit(ch) && ch != '-');
+
+        if (ch == '-')
+        {
+            sign = -1;
+            ch = getChar();
+        }
+
+        do
+        {
+            a = (a << 3) + (a << 1) + (ch - '0');
+            ch = getChar();
+
+        } while (isdigit(ch));
+
+        return a * sign;
+    }
+
+public:
+
+    Scanner() {
+    }
+
+    Scanner(const char *file)
+    {
+        inputFile = fopen(file, "r");
+        cursor = MAX_SIZE;
+    }
+
+    inline Scanner& operator >> (int &x)
+    {
+        x = getNr();
+        return *this;
+    }
+};
+
+int main()
+{
+    return 0;
+}
