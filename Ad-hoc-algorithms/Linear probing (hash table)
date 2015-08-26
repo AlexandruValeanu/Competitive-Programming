@@ -2,16 +2,22 @@
 
 using namespace std;
 
+template <const size_t MAX_SIZE>
 class LinearProbing
 {
+private:
+
+    static const int NIL = -1;
+    static const int DELETED = -2;
+
+    int *table;
+
 public:
 
-    LinearProbing()
-    {
-        table = new int[MAX_SIZE];
+    LinearProbing() : table(new int [MAX_SIZE]) {
 
-        for ( int i = 0; i < MAX_SIZE; ++i )
-            table[i] = EMPTY;
+        for (size_t i = 0; i < MAX_SIZE; ++i )
+            table[i] = NIL;
     }
 
     ~LinearProbing()
@@ -19,47 +25,41 @@ public:
         delete[] table;
     }
 
+    size_t h(const int key) const
+    {
+        return hash<int>()(key) % MAX_SIZE;
+    }
+
     void insert(const int key)
     {
-        int p = ((key & MOD) * PRIME) & MOD;
+        size_t p = h(key);
 
-        while (table[p] != EMPTY && table[p] != ERASED)
-            p = (p + 1) & MOD;
+        while (table[p] != NIL && table[p] != DELETED && table[p] != key)
+            p = (p + 1) % MAX_SIZE;
 
         table[p] = key;
     }
 
-    bool find(const int key)
+    bool find(const int key) const
     {
-        int p = ((key & MOD) * PRIME) & MOD;
+        size_t p = h(key);
 
-        while (table[p] != EMPTY && table[p] != key)
-            p = (p + 1) & MOD;
+        while (table[p] != NIL && table[p] != key)
+            p = (p + 1) % MAX_SIZE;
 
         return table[p] == key;
     }
 
     void erase(const int key)
     {
-        int p = ((key & MOD) * PRIME) & MOD;
+        size_t p = h(key);
 
-        while (table[p] != EMPTY && table[p] != key)
-            p = (p + 1) & MOD;
+        while (table[p] != NIL && table[p] != key)
+            p = (p + 1) % MAX_SIZE;
 
         if (table[p] == key)
-            table[p] = ERASED;
+            table[p] = DELETED;
     }
-
-private:
-
-    static const int MAX_SIZE = 1 << 20;
-    static const int MOD = MAX_SIZE - 1;
-    static const int PRIME = 137;
-
-    static const int EMPTY = -1;
-    static const int ERASED = -2;
-
-    int *table;
 };
 
 int main()
