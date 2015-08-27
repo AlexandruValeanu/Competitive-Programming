@@ -1,0 +1,48 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+void max_heapify(int A[], int N, int i)
+{
+    int l = i * 2;
+    int r = i * 2 + 1;
+
+    int largest;
+
+    if (l < N && A[l] > A[i])
+        largest = l;
+    else
+        largest = i;
+
+    if (r < N && A[r] > A[largest])
+        largest = r;
+
+    if (i != largest)
+    {
+        swap(A[i], A[largest]);
+        max_heapify(A, N, largest);
+    }
+}
+
+void build_max_heap(int A[], int N)
+{
+    for (int i = N / 2; i >= 0; i--)
+        max_heapify(A, N, i);
+}
+
+void heapsort(int A[], int N)
+{
+    build_max_heap(A, N);
+
+    for (int i = N - 1; i >= 1; i--)
+    {
+        swap(A[0], A[i]);
+        N--;
+        max_heapify(A, N, 0);
+    }
+}
+
+int main()
+{
+    return 0;
+}
