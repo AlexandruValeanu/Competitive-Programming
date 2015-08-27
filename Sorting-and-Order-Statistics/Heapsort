@@ -2,43 +2,51 @@
 
 using namespace std;
 
-void max_heapify(int A[], int N, int i)
+void max_heapify(int H[], int N, int i)
 {
-    int l = i * 2;
-    int r = i * 2 + 1;
+    int l, r, largest;
+    bool changed;
 
-    int largest;
-
-    if (l < N && A[l] > A[i])
-        largest = l;
-    else
-        largest = i;
-
-    if (r < N && A[r] > A[largest])
-        largest = r;
-
-    if (i != largest)
+    do
     {
-        swap(A[i], A[largest]);
-        max_heapify(A, N, largest);
-    }
+        changed = false;
+
+        l = 2 * i;
+        r = 2 * i + 1;
+
+        if (l <= N && H[l] > H[i])
+            largest = l;
+        else
+            largest = i;
+
+        if (r <= N && H[r] > H[largest])
+            largest = r;
+
+        if (i != largest)
+        {
+            swap(H[i], H[largest]);
+            i = largest;
+            changed = true;
+        }
+
+    } while (changed == true);
 }
 
-void build_max_heap(int A[], int N)
+void build_max_heap(int H[], int N)
 {
-    for (int i = N / 2; i >= 0; i--)
-        max_heapify(A, N, i);
+    for (int i = N / 2; i >= 1; i--)
+        max_heapify(H, N, i);
 }
 
-void heapsort(int A[], int N)
+void heapsort(int H[], int N) ///1-based
 {
-    build_max_heap(A, N);
+    build_max_heap(H, N);
 
-    for (int i = N - 1; i >= 1; i--)
+    for (int i = N; i >= 2; i--)
     {
-        swap(A[0], A[i]);
+        swap(H[i], H[1]);
         N--;
-        max_heapify(A, N, 0);
+        max_heapify(H, N, 1);
     }
 }
 
