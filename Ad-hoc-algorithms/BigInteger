@@ -30,7 +30,7 @@ private:
     vector<complex<double>> convolution(vector<complex<double>> &, vector<complex<double>> &) const;
 
     BigInteger bruteForceMultiplication(const BigInteger &, const BigInteger &, const int, const int) const;
-    BigInteger karatsubaMultiplication(const BigInteger &, const BigInteger &) const;
+    BigInteger karatsubaMultiplication(const BigInteger &, const BigInteger &, const int, const int) const;
     BigInteger fftMultiplication(const BigInteger &, const BigInteger &, const int, const int) const;
     BigInteger hybridMultiplication(const BigInteger &, const BigInteger &) const;
 
@@ -1109,10 +1109,10 @@ BigInteger BigInteger::bruteForceMultiplication(const BigInteger &A, const BigIn
     vector<int> a5 = convertBase(A.a, base_digits, newBaseDigits);
     vector<int> b5 = convertBase(B.a, base_digits, newBaseDigits);
 
-    vector<long long> x(a5.begin(), a5.end());
-    vector<long long> y(b5.begin(), b5.end());
+    vector<unsigned long long> x(a5.begin(), a5.end());
+    vector<unsigned long long> y(b5.begin(), b5.end());
 
-    vector<long long> c(x.size() + y.size(), 0);
+    vector<unsigned long long> c(x.size() + y.size(), 0);
 
     for (size_t i = 0; i < x.size(); ++i)
         for (size_t j = 0; j < y.size(); ++j)
@@ -1122,10 +1122,12 @@ BigInteger BigInteger::bruteForceMultiplication(const BigInteger &A, const BigIn
     solution.a.clear();
     solution.sign = A.sign * B.sign;
 
-    for (int i = 0, carry = 0; i < (int)c.size(); ++i)
+    unsigned long long carry = 0;
+
+    for (int i = 0; i < (int)c.size(); ++i)
     {
-        long long current = c[i] + carry;
-        solution.a.push_back((current % newBase));
+        unsigned long long current = c[i] + carry;
+        solution.a.push_back(current % newBase);
         carry = (current / newBase);
     }
 
@@ -1135,11 +1137,8 @@ BigInteger BigInteger::bruteForceMultiplication(const BigInteger &A, const BigIn
     return solution;
 }
 
-BigInteger BigInteger::karatsubaMultiplication(const BigInteger &A, const BigInteger &B) const
+BigInteger BigInteger::karatsubaMultiplication(const BigInteger &A, const BigInteger &B, const int newBase, const int newBaseDigits) const
 {
-    const int newBase = 100000; ///ok for 300.000 digits (base 10) integers
-    const int newBaseDigits = 5;
-
     vector<int> a5 = convertBase(A.a, base_digits, newBaseDigits);
     vector<int> b5 = convertBase(B.a, base_digits, newBaseDigits);
 
@@ -1216,20 +1215,26 @@ BigInteger BigInteger::fftMultiplication(const BigInteger &X, const BigInteger &
 
 BigInteger BigInteger::hybridMultiplication(const BigInteger &A, const BigInteger &B) const
 {
+    const int CUT_OFF_KARATSUBA = 19000 * 19000;
+    const int CUT_OFF_FFT       = 81900;
+    ///----------------------------------------------------------------------
+
     int nrA = this->numberOfDigits();
     int nrB = B.numberOfDigits();
 
-    if (1LL * nrA * nrB <= 49LL * 800000LL)
-        return bruteForceMultiplication(A, B, 10000000, 7);
+    if (1LL * nrA * nrB <= 1LL * CUT_OFF_KARATSUBA)
+        return bruteForceMultiplication(A, B, 100000000, 8);
 
-    if (1LL * nrA * nrB <= 36LL * 1500000LL)
-        return bruteForceMultiplication(A, B, 1000000, 6);;
-
-    if (max(nrA, nrB) <= 85000)
-        return karatsubaMultiplication(A, B);
+    if (max(nrA, nrB) <= CUT_OFF_FFT)
+    {
+        if (max(nrA, nrB) <= 48000)
+            return karatsubaMultiplication(A, B, 1000000, 6);
+        else
+            return karatsubaMultiplication(A, B, 100000, 5);
+    }
     else
     {
-        if (max(nrA, nrB) <= 1000000)
+        if (max(nrA, nrB) <= 1700000)
             return fftMultiplication(A, B, 100, 2);
         else
             return fftMultiplication(A, B, 10, 1);
@@ -1488,4 +1493,3 @@ int main()
 {
     return 0;
 }
-
