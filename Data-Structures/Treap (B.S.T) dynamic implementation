@@ -1,0 +1,302 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+class randomGenerator
+{
+public:
+
+    std::mt19937 generator;
+
+    randomGenerator()
+    {
+        unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+        generator = mt19937(seed);
+    }
+
+    int getRandomInt()
+    {
+        return generator();
+    }
+
+} generator;
+
+template <typename dataType> ///only integers
+class Treap
+{
+private:
+
+    class Node
+    {
+public:
+        dataType key;
+        int priority;
+        size_t size;
+
+        Node *l, *r;
+
+        explicit Node() : key(dataType()), priority(0), size(0), l(nullptr), r(nullptr) {
+        }
+
+        Node(const dataType k) : key(k), priority(generator.getRandomInt()), size(1), l(nullptr), r(nullptr) {
+        }
+
+        void update()
+        {
+            this->size = 1;
+
+            if (this->l != nullptr)
+                this->size += this->l->size;
+
+            if (this->r != nullptr)
+                this->size += this->r->size;
+        }
+    };
+
+    Node* join(Node *L, Node *R)
+    {
+        if (L == nullptr)
+            return R;
+
+        if (R == nullptr)
+            return L;
+
+        if (L->priority < R->priority) ///min-heap
+        {
+            L->r = join(L->r, R);
+            L->update();
+
+            return L;
+        }
+        else
+        {
+            R->l = join(L, R->l);
+            R->update();
+
+            return R;
+        }
+    }
+
+    void split(Node *T, Node *&L, Node *&R, const dataType &key)
+    {
+        L = nullptr;
+        R = nullptr;
+
+        if (T == nullptr)
+            return;
+
+        if (T->key < key)
+        {
+            split(T->r, T->r, R, key);
+            L = T;
+        }
+        else
+        {
+            split(T->l, L, T->l, key);
+            R = T;
+        }
+
+        T->update();
+    }
+
+    bool find(Node *T, const dataType &key) const
+    {
+        if (T == nullptr)
+            return false;
+
+        if (T->key == key)
+            return true;
+
+        if (key < T->key)
+            return find(T->l, key);
+        else
+            return find(T->r, key);
+    }
+
+    dataType kth_element(Node *T, const size_t position) const
+    {
+        assert(T != nullptr);
+
+        if (realSize(T->l) + 1 == position)
+            return T->key;
+        else if (position <= realSize(T->l))
+            return kth_element(T->l, position);
+        else
+            return kth_element(T->r, position - realSize(T->l) - 1);
+    }
+
+    vector<dataType> print(Node *T) const
+    {
+        if (T == nullptr)
+            return vector<dataType>();
+
+        vector<dataType> a = print(T->l);
+        a.push_back(T->key);
+        vector<dataType> b = print(T->r);
+
+        for (auto it : b)
+            a.push_back(it);
+
+        return a;
+    }
+
+    size_t realSize(Node *T) const
+    {
+        if (T == nullptr)
+            return 0;
+        else
+            return T->size;
+    }
+
+    void clear(Node *&T)
+    {
+        if (T == nullptr)
+            return;
+
+        clear(T->l);
+        clear(T->r);
+
+        delete T;
+        T = nullptr;
+    }
+
+
+    Node *root;
+
+public:
+
+    Treap() : root(nullptr) {
+    }
+
+    Treap(const Treap &T) : root(nullptr)
+    {
+        vector<dataType> arr = T.print();
+
+        for (const auto it : arr)
+            this->root(it);
+    }
+
+    Treap(const vector<dataType> &arr) : root(nullptr)
+    {
+        for (const auto it : arr)
+            this->insert(it);
+    }
+
+    ~Treap()
+    {
+        this->clear(root);
+    }
+
+    Treap& operator = (const Treap &T)
+    {
+        this->clear(root);
+
+        vector<dataType> arr = T.print();
+
+        for (const auto it : arr)
+            this->insert(it);
+
+        return *this;
+    }
+
+    void insert(const dataType &key)
+    {
+        Node *L, *R;
+
+        split(root, L, R, key);
+        root = join(join(L, new Node(key)), R);
+    }
+
+    void erase(const dataType &key) ///all instances
+    {
+        Node *L, *M, *R;
+
+        split(root, L, M, key);
+        split(M, M, R, key + 1);
+
+        clear(M);
+
+        root = join(L, R);
+    }
+
+    size_t count(const dataType &key)
+    {
+        Node *L, *M, *R;
+
+        split(root, L, M, key);
+        split(M, M, R, key + 1);
+
+        size_t answer = realSize(M);
+
+        L = join(L, M);
+        root = join(L, R);
+
+        return answer;
+    }
+
+    size_t countSmaller(const dataType &key)
+    {
+        Node *L, *R;
+
+        split(root, L, R, key - 1);
+
+        size_t answer = realSize(L);
+
+        root = join(L, R);
+
+        return answer;
+    }
+
+    size_t countSmallerOrEqual(const dataType &key)
+    {
+        Node *L, *R;
+
+        split(root, L, R, key);
+
+        size_t answer = realSize(L);
+
+        root = join(L, R);
+
+        return answer;
+    }
+
+    bool find(const dataType &key) const
+    {
+        return find(root, key);
+    }
+
+    dataType kth_element(const size_t position) const
+    {
+        assert(1 <= position && position <= realSize(root));
+
+        return kth_element(root, position);
+    }
+
+    dataType operator [] (const size_t position) const
+    {
+        return kth_element(position);
+    }
+
+    vector<dataType> print() const
+    {
+        return this->print(root);
+    }
+
+    bool empty() const
+    {
+        if (this->root == nullptr)
+            return true;
+        else
+            return false;
+    }
+
+    size_t size() const
+    {
+        return realSize(root);
+    }
+};
+
+int main()
+{
+    return 0;
+}
