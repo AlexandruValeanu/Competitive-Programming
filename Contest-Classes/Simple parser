@@ -18,7 +18,7 @@ inline char getChar()
     return buffer[position++];
 }
 
-inline int getNr()
+inline int getInt()
 {
     register int a = 0;
     char ch;
