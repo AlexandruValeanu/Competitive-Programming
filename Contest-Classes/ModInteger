@@ -1,6 +1,7 @@
 #include <iostream>
 #include <type_traits>
 #include <cassert>
+#include <vector>
 
 template<unsigned int MOD>
 class ModInteger
@@ -13,7 +14,7 @@ public:
     ModInteger(const ModInteger &rhs) : data(rhs.data) {
     }
 
-    ModInteger(const std::string& str) : data(0) {
+    explicit ModInteger(const std::string& str) : data(0) {
 
         assert(str.size() > 0);
 
@@ -39,7 +40,20 @@ public:
     explicit ModInteger(const unsigned long long &rhs) : data(rhs % MOD) {
     }
 
-    ModInteger(const long long &rhs) : data(0) {
+    ModInteger(const int &rhs) : data(0) {
+
+        if (rhs < 0)
+        {
+            this->data = (-rhs) % MOD;
+            this->data = (MOD -this->data) % MOD;
+        }
+        else
+        {
+            this->data = rhs % MOD;
+        }
+    }
+
+    explicit ModInteger(const long long &rhs) : data(0) {
 
         if (rhs < 0)
         {
