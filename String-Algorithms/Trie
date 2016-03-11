@@ -1,157 +1,336 @@
-#include <iostream>
-#include <fstream>
-#include <cstring>
+#include <bits/stdc++.h>
 
 using namespace std;
 
-const int SIGMA = 26;
-
-class TrieNode
+template<const size_t bufferSize>
+class Scanner
 {
 public:
 
-    TrieNode *sons[SIGMA];
-    int count;
-    int nr_sons;
+    Scanner(std::istream& s = std::cin, std::string sep = " ") : stream(s),
+        buffer(new char[bufferSize]), pointer(bufferSize), lengthInput(0), separators(sep) {
 
-    TrieNode()
+        this->separators.push_back('\0');
+        this->separators.push_back('\n');
+
+        this->stream.seekg(0, this->stream.end);
+        this->lengthInput = this->stream.tellg();
+        this->stream.seekg(0, this->stream.beg);
+    }
+
+    Scanner(const Scanner &scan) : stream(scan.stream), pointer(scan.pointer),
+        lengthInput(scan.lengthInput), separators(scan.separators) {
+
+        for (size_t i = 0; i < bufferSize; ++i)
+            this->buffer[i] = scan.buffer[i];
+    }
+
+    Scanner& operator = (const Scanner &scan)
     {
-        count = 0;
-        nr_sons = 0;
-        memset( sons, 0, sizeof( sons ) );
+        this->stream = scan.stream;
+        this->pointer = scan.pointer;
+        this->lengthInput = scan.lengthInput;
+        this->separators = scan.separators;
+
+        for (size_t i = 0; i < bufferSize; ++i)
+            this->buffer[i] = scan.buffer[i];
+
+        return *this;
+    }
+
+    ~Scanner()
+    {
+        delete[] this->buffer;
+        this->pointer = bufferSize;
+        this->lengthInput = 0;
+    }
+
+    char nextChar()
+    {
+        if (this->eof())
+            return '\0';
+
+        if (this->pointer == bufferSize)
+        {
+            this->pointer = 0;
+            stream.read(buffer, bufferSize);
+        }
+
+        this->lengthInput--;
+
+        return this->buffer[this->pointer++];
+    }
+
+    size_t nextUnsigned(void)
+    {
+        return this->nextInteger<size_t>();
+    }
+
+    int nextInt(void)
+    {
+        return this->nextInteger<int>();
+    }
+
+    long long nextLongLong(void)
+    {
+        return this->nextInteger<long long>();
+    }
+
+    double nextDouble(void)
+    {
+        double key = 0;
+        double fract = 0;
+        int sign = 1;
+        char ch;
+
+        do
+        {
+            ch = this->nextChar();
+
+        } while (separators.find(ch) != std::string::npos && ch != '+' && ch != '-' && !this->eof());
+
+        if (!ch)
+            return 0.0f;
+
+        if (!isdigit(ch))
+        {
+            sign = (ch == '-') ? -1 : 1;
+            ch = this->nextChar();
+        }
+
+        do
+        {
+            key = key * 10.0f + ch - '0';
+            ch = this->nextChar();
+
+        } while (isdigit(ch));
+
+        if (ch == '.')
+        {
+            ch = this->nextChar();
+            size_t lg = 0;
+
+            do
+            {
+                lg++;
+                fract = fract * 10.0f + ch - '0';
+                ch = this->nextChar();
+
+            } while (isdigit(ch));
+
+            while (lg--)
+                fract /= 10.0f;
+        }
+
+        return sign * (key + fract);
+    }
+
+    std::string nextString(void)
+    {
+        std::string str;
+        char ch;
+
+        do
+        {
+            ch = this->nextChar();
+
+        } while (separators.find(ch) != std::string::npos && !this->eof());
+
+        if (!ch)
+            return str;
+        do
+        {
+            str.push_back(ch);
+            ch = this->nextChar();
+
+        } while (separators.find(ch) == std::string::npos);
+
+        return str;
+    }
+
+    bool eof(void) const
+    {
+        return this->lengthInput == 0;
+    }
+
+private:
+
+    std::istream& stream;
+    char *buffer;
+    size_t pointer, lengthInput;
+    std::string separators;
+
+    template<class T>
+    T nextInteger(void)
+    {
+        T key = 0;
+        T sign = 1;
+        char ch;
+
+        do
+        {
+            ch = this->nextChar();
+
+        } while (separators.find(ch) != std::string::npos && ch != '+' && ch != '-' && !this->eof());
+
+        if (!isdigit(ch))
+        {
+            sign = (ch == '-') ? -1 : 1;
+            ch = this->nextChar();
+        }
+
+        do
+        {
+            key = key * 10 + ch - '0';
+            ch = this->nextChar();
+
+        } while (isdigit(ch));
+
+        return sign * key;
     }
 };
 
+template<const unsigned int SIGMA>
 class Trie
 {
 private:
 
-    TrieNode *root;
-
-    void insert( TrieNode *&R, const string &str, size_t pos )
+    class Node
     {
-        if ( pos == str.size() )
+    public:
+
+        int child[SIGMA];
+        int parent, value;
+        char numbOfChildren;
+
+        Node() : child(), parent(), value(), numbOfChildren() {
+
+            memset(child, 0, sizeof child);
+        }
+    };
+
+    inline int alloc()
+    {
+        if (stack.empty() == true)
         {
-            R->count++;
+            if (trie.size() == static_cast<size_t>(cellPos))
+                trie.push_back(trie[0]); ///trie[0] = dummy node
+
+            return cellPos++;
         }
         else
         {
-            if ( R->sons[ str[pos] - 'a' ] == NULL )
-            {
-                R->nr_sons++;
-                R->sons[ str[pos] - 'a' ] = new TrieNode();
-            }
-
-            insert( R->sons[ str[pos] - 'a' ], str, pos + 1 );
+            int t = stack.back();
+            stack.pop_back();
+            return t;
         }
     }
 
-    int find( TrieNode *R, const string &str, size_t pos )
+    inline void dealloc(const int pos)
     {
-        if ( pos == str.size() )
-        {
-            return R->count;
-        }
-        else
-        {
-            if ( R->sons[ str[pos] - 'a' ] == NULL )
-                return 0;
-
-            return find( R->sons[ str[pos] - 'a' ], str, pos + 1 );
-        }
+        stack.push_back(pos);
     }
 
-    bool erase( TrieNode *&R, const string &str, size_t pos )
-    {
-        if ( pos == str.size() )
-        {
-            R->count--;
-        }
-        else
-        {
-            if ( erase( R->sons[ str[pos] - 'a' ], str, pos + 1 ) )
-            {
-                R->sons[ str[pos] - 'a' ] = NULL;
-                R->nr_sons--;
-            }
-        }
-
-        if ( R->count == 0 && R->nr_sons == 0 && R != root )
-        {
-            delete R;
-            return true;
-        }
-
-        return false;
-    }
-
-    int longest_common_prefix( TrieNode *R, const string &str, size_t pos )
-    {
-        if ( pos == str.size() )
-        {
-            return 0;
-        }
-        else
-        {
-            if ( R->sons[ str[pos] - 'a' ] != NULL )
-                return 1 + longest_common_prefix( R->sons[ str[pos] - 'a' ], str, pos + 1 );
-            else
-                return 0;
-        }
-    }
+    vector<Node> trie;
+    vector<int> stack;
+    int cellPos;
 
 public:
 
-    Trie()
-    {
-        root = new TrieNode();
+    Trie() : trie(16), stack(0), cellPos(2) {
     }
 
-    void insert( const string &str )
-    {
-        insert( root, str, 0 );
+    ~Trie() {
+
+        this->clear();
     }
 
-    int find( const string &str )
+    void clear()
     {
-        return find( root, str, 0 );
+        trie.clear();
+        stack.clear();
+        cellPos = 2;
     }
 
-    void erase( const string &str )
+    void insert(const string &str)
     {
-        erase( root, str, 0 );
+        int root = 1;
+
+        for (const char &ch : str)
+        {
+            int c = ch - 'a';
+
+            if (trie[root].child[c] == 0)
+            {
+                int t = alloc();
+
+                trie[root].child[c] = t;
+                trie[trie[root].child[c]].parent = root;
+                trie[root].numbOfChildren++;
+            }
+
+            root = trie[root].child[c];
+        }
+
+        trie[root].value++;
     }
 
-    int longest_common_prefix( const string &str )
+    void erase(const string &str)
     {
-        return longest_common_prefix( root, str, 0 );
+        int root = 1;
+
+        for (const char &c : str)
+            root = trie[root].child[c - 'a'];
+
+        if (root != 0)
+        {
+            trie[root].value--;
+            size_t i = str.size();
+
+            while (trie[root].value == 0 && !trie[root].numbOfChildren && (root != 1))
+            {
+                i--;
+                dealloc(root);
+                root = trie[root].parent;
+                trie[root].child[str[i] - 'a'] = 0;
+                trie[root].numbOfChildren--;
+            }
+        }
+    }
+
+    int count(const string &str) const
+    {
+        int root = 1;
+        size_t i = 0;
+
+        while (i < str.size() && trie[root].child[str[i] - 'a'])
+        {
+            root = trie[root].child[str[i] - 'a'];
+            i++;
+        }
+
+        if (i == str.size())
+            return trie[root].value;
+        else
+            return 0;
+    }
+
+    int prefixMatch(const string &str) const
+    {
+        int root = 1;
+        size_t i = 0;
+
+        while (i < str.size() && trie[root].child[str[i] - 'a'])
+        {
+            root = trie[root].child[str[i] - 'a'];
+            i++;
+        }
+
+        return static_cast<int>(i);
     }
 };
 
 int main()
 {
-    ///ifstream in("trie.in");
-    ///ofstream out("trie.out");
-
-    Trie T;
-
-    cin.sync_with_stdio( false );
-
-    string str;
-    int type;
-
-    while ( cin >> type >> str )
-    {
-        switch( type )
-        {
-            case 0: T.insert( str ); break;
-            case 1: T.erase( str );  break;
-            case 2: cout << T.find( str ) << "\n"; break;
-            case 3: cout << T.longest_common_prefix( str ) << "\n"; break;
-
-            default: break;
-        }
-    }
-
     return 0;
 }
