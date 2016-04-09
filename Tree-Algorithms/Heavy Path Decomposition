@@ -1,210 +1,343 @@
-#include <iostream>
-#include <fstream>
-#include <vector>
+#include <bits/stdc++.h>
 
 using namespace std;
 
-class SegmentTree
+class Node
 {
 public:
 
-    SegmentTree( const int n, const vector<int> &values )
-    {
-        N = n;
-        T = vector<int>( 4 * N );
-        build( 1, 0, N - 1, values );
-    }
+    long long sum;
+    long long lazySum;
+    int length;
+    bool lazy;
+};
 
-    void update( int pos, int value )
-    {
-        update( 1, 0, N - 1, pos, value );
-    }
+void lazyUpdate(Node &S, Node &L, Node &R);
 
-    int query( int st, int dr )
-    {
-        return query( 1, 0, N - 1, st, dr );
-    }
+Node join(Node L, Node R);
+void pureJoin(Node &S, Node &L, Node &R);
 
+void updateNode(Node &S, const Node &value);
+
+long long realSum(Node &S)
+{
+    return S.sum + 1LL * S.lazySum * S.length;
+}
+
+class SegmentTree
+{
 private:
 
-    vector <int> T;
+    void update(int node, int l, int r, int st, int dr, const Node& value)
+    {
+        if (st <= l && r <= dr)
+        {
+            updateNode(tree[node], value);
+        }
+        else
+        {
+            lazyUpdate(tree[node], tree[2 * node], tree[2 * node + 1]);
+
+            int m = (l + r) / 2;
+
+            if (st <= m)
+                update(2 * node, l, m, st, dr, value);
+
+            if (m < dr)
+                update(2 * node + 1, m + 1, r, st, dr, value);
+
+            pureJoin(tree[node], tree[2 * node], tree[2 * node + 1]);
+        }
+    }
+
+    void build(int node, int l, int r, const vector<Node> &keys)
+    {
+        tree[node].length = r - l + 1;
+
+        if (l == r)
+        {
+            updateNode(tree[node], keys[l]);
+        }
+        else
+        {
+            int m = (l + r) / 2;
+
+            build(2 * node, l, m, keys);
+            build(2 * node + 1, m + 1, r, keys);
+
+            pureJoin(tree[node], tree[2 * node], tree[2 * node + 1]);
+        }
+    }
+
+    Node query(int node, int l, int r, int st, int dr)
+    {
+        if (st <= l && r <= dr)
+        {
+            Node solution = tree[node];
+            solution.sum = realSum(solution);
+            solution.lazySum = 0;
+
+            return solution;
+        }
+        else
+        {
+            lazyUpdate(tree[node], tree[2 * node], tree[2 * node + 1]);
+            Node solution;
+
+            int m = (l + r) / 2;
+
+            if (st <= m && m < dr)
+                solution = join(query(2 * node, l, m, st, dr), query(2 * node + 1, m + 1, r, st, dr));
+            else
+            {
+                if (st <= m)
+                    solution = query(2 * node, l, m, st, dr);
+                else
+                    solution = query(2 * node + 1, m + 1, r, st, dr);
+            }
+
+            pureJoin(tree[node], tree[2 * node], tree[2 * node + 1]);
+
+            return solution;
+        }
+    }
+
+public:
+
+    vector<Node> tree;
     int N;
 
-    void build( int node, int st, int dr, const vector<int> &values )
-    {
-        if ( st == dr )
-        {
-            T[node] = values[st];
-        }
-        else
-        {
-            int m = ( st + dr ) / 2;
-
-            build( 2 * node, st, m, values );
-            build( 2 * node + 1, m + 1, dr, values );
-
-            T[node] = max( T[2 * node], T[2 * node + 1] );
-        }
+    SegmentTree() : tree(), N() {
     }
 
-    void update( int node, int st, int dr, int pos, int val )
-    {
-        if ( st == dr )
-        {
-            T[node] = val;
-        }
-        else
-        {
-            int m = ( st + dr ) / 2;
+    SegmentTree(const vector<Node> &keys) : tree(), N() {
 
-            if ( pos <= m ) update( 2 * node, st, m, pos, val );
-            else            update( 2 * node + 1, m + 1, dr, pos, val );
+        this->N = keys.size();
+        tree.resize(4 * N, Node());
 
-            T[node] = max( T[2 * node], T[2 * node + 1] );
-        }
+        build(1, 0, N - 1, keys);
     }
 
-    int query( int node, int st, int dr, int st_q, int dr_q )
+    void update(const int x, const int y, const Node &value)
     {
-        if ( st_q <= st && dr <= dr_q )
-        {
-            return T[node];
-        }
-        else
-        {
-            int m = ( st + dr ) / 2;
-            int val = 0;
+        assert(0 <= x && x <= y && y < N);
+        update(1, 0, N - 1, x, y, value);
+    }
 
-            if ( st_q <= m )
-                val = max( val, query( 2 * node, st, m, st_q, dr_q ) );
-
-            if ( m  < dr_q )
-                val = max( val, query( 2 * node + 1, m + 1, dr, st_q, dr_q ) );
-
-            return val;
-        }
+    Node query(const int x, const int y)
+    {
+        assert(0 <= x && x <= y && y < N);
+        return query(1, 0, N - 1, x, y);
     }
 };
 
-const int Nmax = 1e5 + 2;
+const int MAX_N = 100000 + 1;
+const int NIL = -1;
 
-vector <SegmentTree> ST;
-vector <int> G[Nmax];
-int size[Nmax], path[Nmax], pos_in_path[Nmax], path_length[Nmax], start_node[Nmax];
-int depth[Nmax], father[Nmax], valueNode[Nmax];
-
-int N, nrPaths, Q;
-
-void DFS( int node )
+namespace HeavyPathDecomposition
 {
-    int heavySon = 0;
-    size[node] = 1;
-
-    for ( auto x: G[node] )
+    struct Edge
     {
-        if ( father[x] == 0 )
+        int v;
+        int urm;
+    };
+
+    int head[MAX_N];
+    Edge graph[2 * MAX_N];
+
+    vector<SegmentTree> trees; ///type
+
+    int depth[MAX_N], size[MAX_N], father[MAX_N];
+    Node valueNode[MAX_N]; ///type
+    int path[MAX_N];
+
+    int posInPath[MAX_N], pathLength[MAX_N], startNode[MAX_N];
+
+    int N, nrPaths, contor;
+
+    void clearHPD()
+    {
+        N = 0;
+        nrPaths = 0;
+        contor = 0;
+        trees.clear();
+
+        for (int i = 0; i < MAX_N; ++i)
         {
-            depth[x] = depth[node] + 1;
-            father[x] = node;
-
-            DFS( x );
-
-            size[node] += size[x];
-
-            if ( size[x] > size[heavySon] )
-                heavySon = x;
+            size[i] = 0;
+            father[i] = 0;
+            valueNode[i] = Node();
+            path[i] = 0;
+            posInPath[i] = 0;
+            pathLength[i] = 0;
+            startNode[i] = 0;
         }
     }
 
-    if ( heavySon == 0 )
-        path[node] = nrPaths++;
-    else
-        path[node] = path[heavySon];
-
-    pos_in_path[node] = path_length[ path[node] ]++;
-}
-
-void build_heavy_path()
-{
-    father[1] = 1;
-    depth[1] = 0;
-
-    DFS( 1 );
-
-    for ( int i = 1; i <= N; ++i )
+    void initHeavyPaths(const int n, const vector<Node> &keys) ///type
     {
-        pos_in_path[i] = path_length[ path[i] ] - pos_in_path[i] - 1;
+        N = n;
+        nrPaths = 0;
+        contor = 0;
 
-        if ( pos_in_path[i] == 0 )
-            start_node[ path[i] ] = i;
+        for (int i = 1; i <= N; ++i)
+        {
+            head[i] = NIL;
+            valueNode[i] = keys[i - 1];
+        }
+    }
+
+    void addEdge(const int x, const int y)
+    {
+        assert(1 <= x && x <= N);
+        assert(1 <= y && y <= N);
+
+        assert(x != y);
+
+        graph[contor] = {y, head[x]};
+        head[x] = contor++;
+    }
+
+    void dfs(int node)
+    {
+        int heavySon = 0;
+        size[node] = 1;
+
+        for (int p = head[node]; p != NIL; p = graph[p].urm)
+        {
+            int v = graph[p].v;
+
+            if (father[v] == 0)
+            {
+                depth[v] = depth[node] + 1;
+                father[v] = node;
+
+                dfs(v);
+
+                size[node] += size[v];
+
+                if (size[v] > size[heavySon])
+                    heavySon = v;
+            }
+        }
+
+        if (heavySon == 0)
+            path[node] = nrPaths++;
+        else
+            path[node] = path[heavySon];
+
+        posInPath[node] = pathLength[ path[node] ]++;
+    }
+
+    void buildHeavyPaths()
+    {
+        father[1] = 1;
+        depth[1] = 0;
+
+        dfs(1);
+
+        for (int i = 1; i <= N; ++i)
+        {
+            posInPath[i] = pathLength[ path[i] ] - posInPath[i] - 1;
+
+            if (posInPath[i] == 0)
+                startNode[ path[i] ] = i;
+        }
+    }
+
+    void buildSegmentTrees()
+    {
+        vector<vector<Node>> pathValues(nrPaths);
+
+        for (int i = 0; i < nrPaths; ++i)
+            pathValues[i] = vector<Node>(pathLength[i]);
+
+        for (int i = 1; i <= N; ++i)
+            pathValues[ path[i] ][ posInPath[i] ] = valueNode[i];
+
+        for (int i = 0; i < nrPaths; ++i)
+            trees.push_back(SegmentTree(pathValues[i])); ///type
+    }
+
+    void updateChain(int x, int y, const Node &value) ///type
+    {
+        if (depth[ startNode[ path[x] ] ] < depth[ startNode[ path[y] ] ])
+            swap(x, y);
+
+        if (path[x] == path[y])
+        {
+            trees[ path[x] ].update(min(posInPath[x], posInPath[y]), max(posInPath[x], posInPath[y]), value);
+        }
+        else
+        {
+            trees[ path[x] ].update(0, posInPath[x], value);
+            updateChain(father[ startNode[ path[x] ] ], y, value);
+        }
+    }
+
+    Node query(int x, int y)
+    {
+        if (depth[ startNode[ path[x] ] ] < depth[ startNode[ path[y] ] ])
+            swap( x, y );
+
+        if ( path[x] == path[y] )
+            return trees[ path[x] ].query(min(posInPath[x], posInPath[y]), max(posInPath[x], posInPath[y]));
+        else
+            return join(trees[ path[x] ].query(0, posInPath[x]), query(father[ startNode[ path[x] ] ], y));
+    }
+
+    int lca(int x, int y)
+    {
+        while (path[x] != path[y])
+        {
+            if (depth[ startNode[ path[x] ] ] < depth[ startNode[ path[y] ] ])
+                y = father[ startNode[ path[y] ] ];
+            else
+                x = father[ startNode[ path[x] ] ];
+        }
+
+        return posInPath[x] < posInPath[y] ? x : y;
     }
 }
 
-void build_segment_trees()
+void lazyUpdate(Node &S, Node &L, Node &R)
 {
-    vector<vector<int>> pathValues = vector < vector<int> >( nrPaths );
+    if (S.lazy)
+    {
+        L.lazy = true;
+        R.lazy = true;
+        S.lazy = false;
 
-    for ( int i = 0; i < nrPaths; ++i )
-        pathValues[i] = vector<int>( path_length[i] );
+        L.lazySum += S.lazySum;
+        R.lazySum += S.lazySum;
 
-    for ( int i = 1; i <= N; ++i )
-        pathValues[ path[i] ][ pos_in_path[i] ] = valueNode[i];
-
-    for ( int i = 0; i < nrPaths; ++i )
-        ST.push_back( SegmentTree( pathValues[i].size(), pathValues[i] ) );
+        S.lazySum = 0;
+    }
 }
 
-void update( int node, int value )
+void pureJoin(Node &S, Node &L, Node &R)
 {
-    valueNode[node] = value;
-
-    ST[ path[node] ].update( pos_in_path[node], value );
+    S.sum = realSum(L) + realSum(R);
+    S.length = L.length + R.length;
 }
 
-int query( int x, int y )
+Node join(Node L, Node R)
 {
-    if ( depth[ start_node[ path[x] ] ] < depth[ start_node[ path[y] ] ] )
-        swap( x, y );
+    Node solution;
 
-    if ( path[x] == path[y] )
-        return ST[ path[x] ].query( min( pos_in_path[x], pos_in_path[y] ), max( pos_in_path[x], pos_in_path[y] ) );
-    else
-        return max( ST[ path[x] ].query( 0, pos_in_path[x] ), query( father[ start_node[ path[x] ] ], y ) );
+    solution.sum = L.sum + R.sum;
+    solution.length = L.length + R.length;
+
+    return solution;
+}
+
+void updateNode(Node &S, const Node &value)
+{
+    S.lazySum += value.lazySum;
+    S.lazy = true;
 }
 
 int main()
 {
-    cin.sync_with_stdio( false );
-
-    cin >> N >> Q;
-
-    for ( int i = 1; i <= N; ++i )
-        cin >> valueNode[i];
-
-    for ( int i = 1, a, b; i < N; ++i )
-    {
-        cin >> a >> b;
-
-        G[a].push_back( b );
-        G[b].push_back( a );
-    }
-
-    build_heavy_path();
-    build_segment_trees();
-
-    for ( int i = 1, tip, a, b; i <= Q; ++i )
-    {
-        cin >> tip >> a >> b;
-
-        if ( tip == 0 )
-        {
-            update( a, b );
-        }
-        else
-        {
-            cout << query( a, b ) << "\n";
-        }
-    }
-
     return 0;
 }
