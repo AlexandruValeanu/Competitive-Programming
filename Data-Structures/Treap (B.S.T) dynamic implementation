@@ -28,28 +28,36 @@ private:
 
     class Node
     {
-public:
+    public:
         dataType key;
+        dataType sumArb;
         int priority;
-        size_t size;
+        unsigned int size;
 
         Node *l, *r;
 
-        explicit Node() : key(dataType()), priority(0), size(0), l(nullptr), r(nullptr) {
+        Node() : key(), sumArb(), priority(), size(), l(), r() {
         }
 
-        Node(const dataType k) : key(k), priority(generator.getRandomInt()), size(1), l(nullptr), r(nullptr) {
+        Node(const dataType k) : key(k), sumArb(k), priority(generator.getRandomInt()), size(1), l(nullptr), r(nullptr) {
         }
 
         void update()
         {
             this->size = 1;
+            this->sumArb = this->key;
 
             if (this->l != nullptr)
+            {
                 this->size += this->l->size;
+                this->sumArb += this->l->sumArb;
+            }
 
             if (this->r != nullptr)
+            {
                 this->size += this->r->size;
+                this->sumArb += this->r->sumArb;
+            }
         }
     };
 
@@ -113,7 +121,7 @@ public:
             return find(T->r, key);
     }
 
-    dataType kth_element(Node *T, const size_t position) const
+    dataType kth_element(Node *T, const unsigned int position) const
     {
         assert(T != nullptr);
 
@@ -140,7 +148,7 @@ public:
         return a;
     }
 
-    size_t realSize(Node *T) const
+    unsigned int realSize(Node *T) const
     {
         if (T == nullptr)
             return 0;
@@ -160,6 +168,52 @@ public:
         T = nullptr;
     }
 
+    void clearOnce(Node *&T)
+    {
+        if (T->l == nullptr && T->r == nullptr)
+        {
+            delete T;
+            T = nullptr;
+        }
+        else
+        {
+            Node *aux = T;
+
+            while (aux->l != nullptr)
+                aux = aux->l;
+
+            aux->key = numeric_limits<dataType>::min();
+
+            Node *L, *R;
+            split(T, L, R, numeric_limits<dataType>::min() + 1);
+
+            assert(L != nullptr);
+
+            clear(L);
+            T = R;
+        }
+    }
+
+    dataType sumSmallerOrEqual(const dataType &key)
+    {
+        Node *L, *M, *R;
+
+        split(root, L, M, key);
+        split(M, M, R, key + 1);
+
+        dataType answer = 0;
+
+        if (L != nullptr)
+            answer += L->sumArb;
+
+        if (M != nullptr)
+            answer += M->sumArb;
+
+        L = join(L, M);
+        root = join(L, R);
+
+        return answer;
+    }
 
     Node *root;
 
@@ -178,7 +232,7 @@ public:
 
     Treap(const vector<dataType> &arr) : root(nullptr)
     {
-        for (const auto it : arr)
+        for (const dataType it : arr)
             this->insert(it);
     }
 
@@ -207,7 +261,7 @@ public:
         root = join(join(L, new Node(key)), R);
     }
 
-    void erase(const dataType &key) ///all instances
+    void eraseAll(const dataType &key) ///all instances
     {
         Node *L, *M, *R;
 
@@ -219,14 +273,27 @@ public:
         root = join(L, R);
     }
 
-    size_t count(const dataType &key)
+    void eraseOnce(const dataType &key)
     {
         Node *L, *M, *R;
 
         split(root, L, M, key);
         split(M, M, R, key + 1);
 
-        size_t answer = realSize(M);
+        clearOnce(M);
+
+        L = join(L, M);
+        root = join(L, R);
+    }
+
+    unsigned int count(const dataType &key)
+    {
+        Node *L, *M, *R;
+
+        split(root, L, M, key);
+        split(M, M, R, key + 1);
+
+        unsigned int answer = realSize(M);
 
         L = join(L, M);
         root = join(L, R);
@@ -234,30 +301,44 @@ public:
         return answer;
     }
 
-    size_t countSmaller(const dataType &key)
+    unsigned int countSmaller(const dataType &key)
     {
-        Node *L, *R;
+        Node *L, *M, *R;
 
-        split(root, L, R, key - 1);
+        split(root, L, M, key);
+        split(M, M, R, key + 1);
 
-        size_t answer = realSize(L);
+        unsigned int answer = realSize(L);
 
+        L = join(L, M);
         root = join(L, R);
 
         return answer;
     }
 
-    size_t countSmallerOrEqual(const dataType &key)
+    unsigned int countSmallerOrEqual(const dataType &key)
     {
-        Node *L, *R;
+        Node *L, *M, *R;
 
-        split(root, L, R, key);
+        split(root, L, M, key);
+        split(M, M, R, key + 1);
 
-        size_t answer = realSize(L);
+        unsigned int answer = realSize(L) + realSize(M);
 
+        L = join(L, M);
         root = join(L, R);
 
         return answer;
+    }
+
+    unsigned int countGreater(const dataType &key)
+    {
+        return this->size() - this->countSmallerOrEqual(key);
+    }
+
+    dataType sumRange(const dataType &x, const dataType &y)
+    {
+        return sumSmallerOrEqual(y) - sumSmallerOrEqual(x - 1);
     }
 
     bool find(const dataType &key) const
@@ -265,14 +346,14 @@ public:
         return find(root, key);
     }
 
-    dataType kth_element(const size_t position) const
+    dataType kth_element(const unsigned int position) const
     {
         assert(1 <= position && position <= realSize(root));
 
         return kth_element(root, position);
     }
 
-    dataType operator [] (const size_t position) const
+    dataType operator [] (const unsigned int position) const
     {
         return kth_element(position);
     }
@@ -284,13 +365,10 @@ public:
 
     bool empty() const
     {
-        if (this->root == nullptr)
-            return true;
-        else
-            return false;
+        return this->root == nullptr;
     }
 
-    size_t size() const
+    unsigned int size() const
     {
         return realSize(root);
     }
@@ -298,5 +376,6 @@ public:
 
 int main()
 {
+
     return 0;
 }
