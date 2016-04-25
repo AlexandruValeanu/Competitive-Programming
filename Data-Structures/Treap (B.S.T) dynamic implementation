@@ -14,14 +14,14 @@ public:
         generator = mt19937(seed);
     }
 
-    int getRandomInt()
+    int randomInt()
     {
         return generator();
     }
 
 } generator;
 
-template <typename dataType> ///only integers
+template <typename T> ///only integers
 class Treap
 {
 private:
@@ -29,34 +29,32 @@ private:
     class Node
     {
     public:
-        dataType key;
-        dataType sumArb;
+        T key;
+        T sumTree;
         int priority;
         unsigned int size;
 
-        Node *l, *r;
+        Node *leftSon, *rightSon;
 
-        Node() : key(), sumArb(), priority(), size(), l(), r() {
-        }
-
-        Node(const dataType k) : key(k), sumArb(k), priority(generator.getRandomInt()), size(1), l(nullptr), r(nullptr) {
+        Node(const T k) : key{k}, sumTree{k}, priority{generator.randomInt()},
+            size{1}, leftSon{nullptr}, rightSon{nullptr} {
         }
 
         void update()
         {
             this->size = 1;
-            this->sumArb = this->key;
+            this->sumTree = this->key;
 
-            if (this->l != nullptr)
+            if (this->leftSon != nullptr)
             {
-                this->size += this->l->size;
-                this->sumArb += this->l->sumArb;
+                this->size += this->leftSon->size;
+                this->sumTree += this->leftSon->sumTree;
             }
 
-            if (this->r != nullptr)
+            if (this->rightSon != nullptr)
             {
-                this->size += this->r->size;
-                this->sumArb += this->r->sumArb;
+                this->size += this->rightSon->size;
+                this->sumTree += this->rightSon->sumTree;
             }
         }
     };
@@ -71,296 +69,438 @@ private:
 
         if (L->priority < R->priority) ///min-heap
         {
-            L->r = join(L->r, R);
+            L->rightSon = join(L->rightSon, R);
             L->update();
 
             return L;
         }
         else
         {
-            R->l = join(L, R->l);
+            R->leftSon = join(L, R->leftSon);
             R->update();
 
             return R;
         }
     }
 
-    void split(Node *T, Node *&L, Node *&R, const dataType &key)
+    void split(Node *tree, Node *&L, Node *&R, const T &key)
     {
         L = nullptr;
         R = nullptr;
 
-        if (T == nullptr)
+        if (tree == nullptr)
             return;
 
-        if (T->key < key)
+        if (tree->key < key)
         {
-            split(T->r, T->r, R, key);
-            L = T;
+            split(tree->rightSon, tree->rightSon, R, key);
+            L = tree;
         }
         else
         {
-            split(T->l, L, T->l, key);
-            R = T;
+            split(tree->leftSon, L, tree->leftSon, key);
+            R = tree;
         }
 
-        T->update();
+        tree->update();
     }
 
-    bool find(Node *T, const dataType &key) const
+    bool find(const Node *&tree, const T &key) const
     {
-        if (T == nullptr)
+        if (tree == nullptr)
             return false;
 
-        if (T->key == key)
+        if (tree->key == key)
             return true;
 
-        if (key < T->key)
-            return find(T->l, key);
+        if (key < tree->key)
+            return find(tree->leftSon, key);
         else
-            return find(T->r, key);
+            return find(tree->rightSon, key);
     }
 
-    dataType kth_element(Node *T, const unsigned int position) const
+    T kth_element(const Node *&tree, const unsigned int position) const
     {
-        assert(T != nullptr);
+        assert(tree != nullptr);
 
-        if (realSize(T->l) + 1 == position)
-            return T->key;
-        else if (position <= realSize(T->l))
-            return kth_element(T->l, position);
+        if (realSize(tree->leftSon) + 1 == position)
+            return tree->key;
+        else if (position <= realSize(tree->leftSon))
+            return kth_element(tree->leftSon, position);
         else
-            return kth_element(T->r, position - realSize(T->l) - 1);
+            return kth_element(tree->rightSon, position - realSize(tree->leftSon) - 1);
     }
 
-    vector<dataType> print(Node *T) const
+    vector<T> print(const Node *tree) const
     {
-        if (T == nullptr)
-            return vector<dataType>();
+        if (tree == nullptr)
+            return {};
 
-        vector<dataType> a = print(T->l);
-        a.push_back(T->key);
-        vector<dataType> b = print(T->r);
+        vector<T> a = print(tree->leftSon);
+        a.push_back(tree->key);
+        vector<T> b = print(tree->rightSon);
 
-        for (auto it : b)
+        for (const auto &it : b)
             a.push_back(it);
 
         return a;
     }
 
-    unsigned int realSize(Node *T) const
+    unsigned int realSize(const Node *tree) const
     {
-        if (T == nullptr)
+        if (tree == nullptr)
             return 0;
         else
-            return T->size;
+            return tree->size;
     }
 
-    void clear(Node *&T)
+    void clear(Node *&tree)
     {
-        if (T == nullptr)
+        if (tree == nullptr)
             return;
 
-        clear(T->l);
-        clear(T->r);
+        clear(tree->leftSon);
+        clear(tree->rightSon);
 
-        delete T;
-        T = nullptr;
+        delete tree;
+        tree = nullptr;
     }
 
-    void clearOnce(Node *&T)
+    void clearOnce(Node *&tree)
     {
-        if (T->l == nullptr && T->r == nullptr)
+        assert(tree != nullptr);
+
+        if (tree->leftSon == nullptr && tree->rightSon == nullptr)
         {
-            delete T;
-            T = nullptr;
+            delete tree;
+            tree = nullptr;
         }
         else
         {
-            Node *aux = T;
+            Node *aux = tree;
 
-            while (aux->l != nullptr)
-                aux = aux->l;
+            vector<Node*> stackNodes;
 
-            aux->key = numeric_limits<dataType>::min();
+            while (aux->leftSon != nullptr || aux->rightSon != nullptr)
+            {
+                stackNodes.push_back(aux);
 
-            Node *L, *R;
-            split(T, L, R, numeric_limits<dataType>::min() + 1);
+                if (aux->leftSon != nullptr)
+                    aux = aux->leftSon;
+                else
+                    aux = aux->rightSon;
+            }
 
-            assert(L != nullptr);
+            for (auto it : stackNodes)
+                assert(it != nullptr);
 
-            clear(L);
-            T = R;
+            assert(stackNodes.size() > 0);
+            assert(aux != nullptr);
+            assert(aux->leftSon == nullptr && aux->rightSon == nullptr);
+
+            if (stackNodes.back()->leftSon == aux)
+                stackNodes.back()->leftSon = nullptr;
+            else
+                stackNodes.back()->rightSon = nullptr;
+
+            while (stackNodes.size())
+            {
+                stackNodes.back()->update();
+                stackNodes.pop_back();
+            }
+
+            delete aux;
+            aux = nullptr;
         }
     }
 
-    dataType sumSmallerOrEqual(const dataType &key)
+    T sumSmallerOrEqual(const T &key)
     {
         Node *L, *M, *R;
 
-        split(root, L, M, key);
-        split(M, M, R, key + 1);
+        split(this->root, L, M, key);
+        split(M, M, R, key + EPSILON);
 
-        dataType answer = 0;
+        T answer = 0;
 
         if (L != nullptr)
-            answer += L->sumArb;
+            answer += L->sumTree;
 
         if (M != nullptr)
-            answer += M->sumArb;
+            answer += M->sumTree;
 
         L = join(L, M);
-        root = join(L, R);
+        this->root = join(L, R);
 
         return answer;
     }
 
+    T min_element(Node *tree) const
+    {
+        if (tree == nullptr)
+            throw "Treap::min_element -> treap is null";
+
+        Node *aux = tree;
+
+        while (aux->leftSon != nullptr)
+            aux = aux->leftSon;
+
+        return aux->key;
+    }
+
+    T max_element(Node *tree) const
+    {
+        if (tree == nullptr)
+            throw "Treap::max_element -> treap is null";
+
+        Node *aux = tree;
+
+        while (aux->rightSon != nullptr)
+            aux = aux->rightSon;
+
+        return aux->key;
+    }
+
+    Treap(const Node *& tree) : root{nullptr}, EPSILON{1}
+    {
+        this->root = tree;
+    }
+
     Node *root;
+    T EPSILON;
 
 public:
 
-    Treap() : root(nullptr) {
+    Treap() : root{nullptr}, EPSILON{1} {
+
     }
 
-    Treap(const Treap &T) : root(nullptr)
+    Treap(const Treap &rhs) : root{nullptr}, EPSILON{rhs.EPSILON}
     {
-        vector<dataType> arr = T.print();
+        vector<T> arr = rhs.print();
 
-        for (const auto it : arr)
+        for (const T &it : arr)
             this->root(it);
     }
 
-    Treap(const vector<dataType> &arr) : root(nullptr)
+    Treap(const vector<T> &arr) : root{nullptr}, EPSILON{1}
     {
-        for (const dataType it : arr)
+        for (const T &it : arr)
+            this->insert(it);
+    }
+
+    Treap(const initializer_list<T> &ls) : root{nullptr}, EPSILON{1}
+    {
+        for (const T &it : ls)
             this->insert(it);
     }
 
     ~Treap()
     {
-        this->clear(root);
+        this->clear(this->root);
     }
 
-    Treap& operator = (const Treap &T)
+    Treap& operator = (const Treap &rhs)
     {
-        this->clear(root);
+        this->clear(this->root);
 
-        vector<dataType> arr = T.print();
+        vector<T> arr = rhs.print();
 
-        for (const auto it : arr)
+        for (const auto &it : arr)
             this->insert(it);
 
         return *this;
     }
 
-    void insert(const dataType &key)
+    void setEpsilon(const T &e)
+    {
+        this->EPSILON = e;
+    }
+
+    void insert(const T &key)
     {
         Node *L, *R;
 
-        split(root, L, R, key);
-        root = join(join(L, new Node(key)), R);
+        split(this->root, L, R, key);
+        this->root = join(join(L, new Node(key)), R);
     }
 
-    void eraseAll(const dataType &key) ///all instances
+    /*
+        eraseOne(key) - erases one instance of key
+        key + EPSILON must not overflow
+    */
+    bool eraseOne(const T &key)
     {
         Node *L, *M, *R;
 
-        split(root, L, M, key);
-        split(M, M, R, key + 1);
+        split(this->root, L, M, key);
+        split(M, M, R, key + EPSILON);
 
-        clear(M);
+        bool success = false;
 
-        root = join(L, R);
-    }
-
-    void eraseOnce(const dataType &key)
-    {
-        Node *L, *M, *R;
-
-        split(root, L, M, key);
-        split(M, M, R, key + 1);
-
-        clearOnce(M);
+        if (M != nullptr)
+        {
+            success = true;
+            clearOnce(M);
+        }
 
         L = join(L, M);
-        root = join(L, R);
+        this->root = join(L, R);
+
+        return success;
     }
 
-    unsigned int count(const dataType &key)
+    /*
+        eraseAll(key) - erases all instances of key
+        key + EPSILON must not overflow
+    */
+    bool eraseAll(const T &key)
     {
         Node *L, *M, *R;
 
-        split(root, L, M, key);
-        split(M, M, R, key + 1);
+        split(this->root, L, M, key);
+        split(M, M, R, key + EPSILON);
 
-        unsigned int answer = realSize(M);
+        bool success = false;
+
+        if (M != nullptr)
+        {
+            success = true;
+            clear(M);
+        }
+
+        this->root = join(L, R);
+
+        return success;
+    }
+
+    /*
+        divide - count number of elements smaller, equal, greater than key
+        key + EPSILON must not overflow
+    */
+    tuple<unsigned int, unsigned int, unsigned int> divide(const T &key)
+    {
+        Node *L, *M, *R;
+
+        split(this->root, L, M, key);
+        split(M, M, R, key + EPSILON);
+
+        auto t = make_tuple(realSize(L), realSize(M), realSize(R));
 
         L = join(L, M);
-        root = join(L, R);
+        this->root = join(L, R);
+
+        return t;
+    }
+
+    unsigned int countSmaller(const T &key)
+    {
+        auto t = divide(key);
+        return get<0>(t);
+    }
+
+    unsigned int countEqual(const T &key)
+    {
+        auto t = divide(key);
+        return get<1>(t);
+    }
+
+    unsigned int countSmallerOrEqual(const T &key)
+    {
+        auto t = divide(key);
+        return get<0>(t) + get<1>(t);
+    }
+
+    unsigned int countGreater(const T &key)
+    {
+        auto t = divide(key);
+        return get<2>(t);
+    }
+
+    T min_element() const
+    {
+        return min_element(this->root);
+    }
+
+    T max_element() const
+    {
+        return max_element(this->root);
+    }
+
+    T next_element(const T &key)
+    {
+        Node *M, *R;
+
+        split(this->root, M, R, key + EPSILON);
+
+        T answer;
+
+        if (R == nullptr)
+            answer = numeric_limits<T>::max();
+        else
+            answer = min_element(R);
+
+        this->root = join(M, R);
 
         return answer;
     }
 
-    unsigned int countSmaller(const dataType &key)
+    T prev_element(const T &key)
     {
-        Node *L, *M, *R;
+        Node *L, *M;
 
-        split(root, L, M, key);
-        split(M, M, R, key + 1);
+        split(this->root, L, M, key);
 
-        unsigned int answer = realSize(L);
+        T answer;
 
-        L = join(L, M);
-        root = join(L, R);
+        if (L == nullptr)
+            answer = numeric_limits<T>::min();
+        else
+            answer = max_element(L);
+
+        this->root = join(L, M);
 
         return answer;
     }
 
-    unsigned int countSmallerOrEqual(const dataType &key)
+    bool find(const T &key) const
     {
-        Node *L, *M, *R;
-
-        split(root, L, M, key);
-        split(M, M, R, key + 1);
-
-        unsigned int answer = realSize(L) + realSize(M);
-
-        L = join(L, M);
-        root = join(L, R);
-
-        return answer;
+        return find(this->root, key);
     }
 
-    unsigned int countGreater(const dataType &key)
+    /*
+        kth_element is 1-based
+    */
+    T kth_element(const unsigned int position) const
     {
-        return this->size() - this->countSmallerOrEqual(key);
+        if (position < 1 || position > realSize(this->root))
+            throw out_of_range{"Treap::kth_element"};
+
+        return kth_element(this->root, position);
     }
 
-    dataType sumRange(const dataType &x, const dataType &y)
-    {
-        return sumSmallerOrEqual(y) - sumSmallerOrEqual(x - 1);
-    }
-
-    bool find(const dataType &key) const
-    {
-        return find(root, key);
-    }
-
-    dataType kth_element(const unsigned int position) const
-    {
-        assert(1 <= position && position <= realSize(root));
-
-        return kth_element(root, position);
-    }
-
-    dataType operator [] (const unsigned int position) const
+    /*
+        operator[] is 1-based (calls Treap::kth_element)
+    */
+    T operator [](const unsigned int position) const
     {
         return kth_element(position);
     }
 
-    vector<dataType> print() const
+    /*
+        x - EPSILON must not underflow
+    */
+    T sumRange(const T &x, const T &y)
     {
-        return this->print(root);
+        if (y > x)
+            return static_cast<T>(0);
+        else
+            return sumSmallerOrEqual(y) - sumSmallerOrEqual(x - EPSILON);
+    }
+
+    vector<T> print() const
+    {
+        return this->print(this->root);
     }
 
     bool empty() const
@@ -372,10 +512,47 @@ public:
     {
         return realSize(root);
     }
+
+    /**
+        Interface
+
+    Treap()
+    Treap(const Treap &rhs)
+    Treap(const vector<T> &arr)
+    Treap(const initializer_list<T> &ls)
+    Treap& operator = (const Treap &rhs)
+    ~Treap()
+    void setEpsilon(const T &e)
+
+    void insert(const T &key)
+
+    bool eraseOne(const T &key)
+    bool eraseAll(const T &key)
+
+    T operator [](const unsigned int position) const
+    T kth_element(const unsigned int position) const
+    bool find(const T &key) const
+
+    tuple<unsigned int, unsigned int, unsigned int> divide(const T &key)
+    unsigned int countSmaller(const T &key)
+    unsigned int countEqual(const T &key)
+    unsigned int countSmallerOrEqual(const T &key)
+    unsigned int countGreater(const T &key)
+
+    T prev_element(const T &key)
+    T next_element(const T &key)
+    T max_element() const
+    T min_element() const
+
+    T sumRange(const T &x, const T &y)
+
+    unsigned int size() const
+    bool empty() const
+    vector<T> print() const
+**/
 };
 
 int main()
 {
-
     return 0;
 }
