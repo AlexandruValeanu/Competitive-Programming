@@ -1,0 +1,29 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+void gen02(std::ostream& out) {
+  int n = 100000;
+  int k = 4000;
+  int p = 7517;
+  n = n / k * k;
+  std::vector<int> as(n);
+  for (int i = 0; i < n / k; i++) {
+    for (int j = 0; j < k; j++) {
+      as[i * k + j] = j * p + 1;
+    }
+  }
+  out << n << std::endl;
+  for (int j = 0; j < n ;j++) {
+    if (j > 0) out << " ";
+    out << as[j];
+  }
+  out << std::endl;
+}
+
+int main()
+{
+    gen02(cout);
+
+    return 0;
+}
