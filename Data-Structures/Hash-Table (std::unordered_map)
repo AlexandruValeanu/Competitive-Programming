@@ -43,21 +43,16 @@ private:
         }
     }
 
-    unsigned int getPosition(const std::unique_ptr<std::pair<T,V>[]>& _table, const T& key) const
+    unsigned int check(const std::unique_ptr<std::pair<T,V>[]>& _table, const unsigned int p, const T& key) const
     {
-        unsigned int p = (prime * hasher(key)) & MASK;
-
-        while (_table[p].first != key && _table[p].first != EMPTY && _table[p].first != ERASED)
-            p = (p + 1) & MASK;
-
-        return p;
+        return _table[p].first != EMPTY && _table[p].first != key;
     }
 
-    unsigned int getPositionSimple(const std::unique_ptr<std::pair<T,V>[]>& _table, const T& key) const
+    unsigned int supposedPosition(const std::unique_ptr<std::pair<T,V>[]>& _table, const T& key) const
     {
         unsigned int p = (prime * hasher(key)) & MASK;
 
-        while (_table[p].first != key && _table[p].first != EMPTY)
+        while (check(_table, p, key))
             p = (p + 1) & MASK;
 
         return p;
@@ -65,7 +60,7 @@ private:
 
     void insert(std::unique_ptr<std::pair<T,V>[]>& _table, const T& key, const V& value)
     {
-        unsigned int p = getPosition(_table, key);
+        unsigned int p = supposedPosition(_table, key);
 
         if (_table[p].first != key)
         {
@@ -73,28 +68,18 @@ private:
             this->_size++;
         }
 
-        _table[p].second += value;
+        _table[p].second = value;
     }
 
     void erase(std::unique_ptr<std::pair<T,V>[]>& _table, const T& key)
     {
-        unsigned int p = getPositionSimple(_table, key);
+        unsigned int p = supposedPosition(_table, key);
 
         if (_table[p].first == key)
         {
             _table[p].first = ERASED;
             _table[p].second = V();
         }
-    }
-
-    V find(const std::unique_ptr<std::pair<T,V>[]>& _table, const T& key) const
-    {
-        unsigned int p = getPositionSimple(_table, key);
-
-        if (_table[p].first == key)
-            return _table[p].second;
-        else
-            return V();
     }
 
     void rehash()
@@ -124,15 +109,6 @@ public:
         this->init(this->table);
     }
 
-    HashTable(const std::initializer_list<T>& ls) : prime(generatePrime()), hasher(), table(), _size(0)
-    {
-        this->table = std::make_unique<std::pair<T,V>[]>(MAX_SIZE);
-        this->init(this->table);
-
-        for (T x : ls)
-            this->insert(x, V(1));
-    }
-
     HashTable(const HashTable &rhs) : prime(rhs.prime), hasher(rhs.hasher), table(), _size(0)
     {
         this->table = std::make_unique<std::pair<T,V>[]>(MAX_SIZE);
@@ -153,7 +129,7 @@ public:
 
     V& operator [] (const T& key)
     {
-        unsigned int p = getPosition(this->table, key);
+        unsigned int p = supposedPosition(this->table, key);
 
         if (this->table[p].first != key)
         {
@@ -164,7 +140,7 @@ public:
             if (2 * this->_size >= MAX_SIZE)
                 rehash();
 
-            p = getPosition(this->table, key);
+            p = supposedPosition(this->table, key);
             assert(this->table[p].first == key);
         }
 
@@ -176,14 +152,20 @@ public:
         this->erase(this->table, key);
     }
 
-    V find(const T& key) const
+    bool find(const T& key) const
     {
-        return this->find(this->table, key);
+        unsigned int p = supposedPosition(this->table, key);
+        return this->table[p].first == key;
     }
 
     V count(const T& key) const
     {
-        return this->find(key);
+        unsigned int p = supposedPosition(this->table, key);
+
+        if (this->table[p].first == key)
+            return this->table[p].second;
+        else
+            return V();
     }
 
     size_t size() const
