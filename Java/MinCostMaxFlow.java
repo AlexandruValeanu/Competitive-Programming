@@ -53,6 +53,11 @@ public class MinCostMaxFlow {
         newDist = new int[N];
         realDist = new int[N];
     }
+    
+    void addDoubleEdge(int from, int to, int capacity, int cost){
+        addEdge(from, to, capacity, cost);
+        addEdge(to, from, 0, -cost);
+    }
 
     void addEdge(int from, int to, int capacity, int cost){
         from--; to--;
