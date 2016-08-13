@@ -1,5 +1,4 @@
-static class Graph{
-
+class Graph{
     private static class Edge{
         int node;
         int next;
@@ -10,52 +9,51 @@ static class Graph{
         }
     }
 
-    public final static int NIL = -1;
+    final static int NIL = -1;
     private int[] head;
     private ArrayList<Edge> graph;
 
     private int N;
-    private int contor;
-    
+    private int counter;
+
     Graph(int N){
         initialize(N);
     }
+    
+    public int getN() {
+        return N;
+    }
 
-    void initialize(final int N){
+    private void initialize(final int N){
         head = new int[N];
         graph = new ArrayList<>();
 
-        System.gc();
-
         this.N = N;
-        this.contor = 0;
+        this.counter = 0;
 
-        for (int i = 0; i < N; ++i)
-            head[i] = NIL;
+        Arrays.fill(head, NIL);
     }
 
     void addEdge(int x, int y){
+        assert 1 <= x && x <= N;
         x--; y--;
         graph.add(new Edge(y, head[x]));
-        head[x] = contor++;
+        head[x] = counter++;
     }
 
     int getHead(int node){
+        assert 1 <= node && node <= N;
         node--;
         return head[node];
     }
 
     int getNext(int p){
-        assert 0 <= p && p < contor;
+        assert 0 <= p && p < counter;
         return graph.get(p).next;
     }
 
     int getNeighbour(int p){
-        assert 0 <= p && p < contor;
+        assert 0 <= p && p < counter;
         return graph.get(p).node + 1;
-    }
-    
-    int getN(){
-        return N;
     }
 }
