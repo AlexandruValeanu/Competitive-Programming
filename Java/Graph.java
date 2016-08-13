@@ -16,6 +16,10 @@ static class Graph{
 
     private int N;
     private int contor;
+    
+    Graph(int N){
+        initialize(N);
+    }
 
     void initialize(final int N){
         head = new int[N];
@@ -49,5 +53,9 @@ static class Graph{
     int getNeighbour(int p){
         assert 0 <= p && p < contor;
         return graph.get(p).node + 1;
+    }
+    
+    int getN(){
+        return N;
     }
 }
