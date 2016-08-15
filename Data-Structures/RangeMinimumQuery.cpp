@@ -25,6 +25,7 @@ public:
 
     void setIndex(int index, int key)
     {
+        assert(1 <= index && index <= N);
         rmq[0][index] = key;
     }
 
@@ -45,6 +46,8 @@ public:
 
     int query(int x, int y)
     {
+        assert(1 <= x && x <= y && y <= N);
+
         int dif = y - x + 1;
         int k = _log2[dif];
 
