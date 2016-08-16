@@ -20,7 +20,7 @@ class MaxFlow{
 
     private ArrayList<Edge> G;
     private int[] head, pointer, father;
-    private int N, contor;
+    private int N;
 
     MaxFlow(int N){
         this.G =  new ArrayList<>();
@@ -28,22 +28,28 @@ class MaxFlow{
         this.pointer = new int[N + 1];
         this.father = new int[N + 1];
         this.N = N;
-        this.contor = 0;
 
-        for (int i = 1; i <= N; ++i)
-            this.head[i] = NIL;
+        Arrays.fill(head, NIL);
     }
 
     void addEdge(int x, int y, int capacity){
+        x--; y--;
+
+        if (!(0 <= x && x < N)) throw new AssertionError();
+        if (!(0 <= y && y < N)) throw new AssertionError();
+
         G.add(new Edge(0, capacity, y, head[x]));
-        head[x] = contor++;
+        head[x] = G.size() - 1;
+    }
+
+    void addDoubleEdge(int x, int y, int capacity){
+        addEdge(x, y, capacity);
+        addEdge(y, x, 0);
     }
 
     private boolean BFS(int S, int T){
-        for (int i = 1; i <= N; i++) {
-            pointer[i] = 0;
-            father[i] = 0;
-        }
+        Arrays.fill(father, NIL);
+        Arrays.fill(pointer, NIL);
 
         Queue<Integer> queue = new LinkedList<>();
         queue.add(S);
@@ -58,7 +64,7 @@ class MaxFlow{
                 int flow = e.flow;
                 int capacity = e.capacity;
 
-                if (father[son] == 0 && capacity > flow){
+                if (father[son] == NIL && capacity > flow){
                     father[son] = node;
                     pointer[son] = p;
 
@@ -74,13 +80,20 @@ class MaxFlow{
     }
 
     int maxFlow(int S, int T){
+        S--; T--;
+
+        if (!(0 <= S && S < N)) throw new AssertionError();
+        if (!(0 <= T && T < N)) throw new AssertionError();
+        if (S == T) throw new AssertionError();
+
         int totalFlow = 0;
 
         while (BFS(S, T)){
+
             for (int p = head[T]; p != NIL; p = G.get(p).next) {
                 int son = G.get(p).node;
 
-                if (father[son] != 0 && G.get(p ^ 1).capacity > G.get(p ^ 1).flow){
+                if (father[son] != NIL && G.get(p ^ 1).capacity > G.get(p ^ 1).flow){
                     father[T] = son;
                     pointer[T] = p ^ 1;
 
@@ -106,5 +119,22 @@ class MaxFlow{
         }
 
         return totalFlow;
+    }
+
+    ArrayList<Integer> getSaturatedEdges(int node){
+        node--;
+
+        if (!(0 <= node && node < N)) throw new AssertionError();
+
+        ArrayList<Integer> list = new ArrayList<>();
+
+        for (int p = head[node]; p != NIL; p = G.get(p).next) {
+            Edge e = G.get(p);
+
+            if (e.flow == e.capacity && e.capacity > 0)
+                list.add(e.node + 1);
+        }
+
+        return list;
     }
 }
