@@ -167,7 +167,7 @@ class PushRelabel {
 
         while (!queue.isEmpty()){
             int v = queue.remove();
-            active[v] = true;
+            active[v] = false;
             discharge(v);
         }
 
