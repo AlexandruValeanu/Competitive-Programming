@@ -72,4 +72,27 @@ class Graph{
         node--;
         return degree[node];
     }
+
+    Graph transpose(){
+        Graph GT = new Graph(N);
+
+        for (int i = 1; i <= N; i++) {
+            for (int son : getNeighbours(i))
+                GT.addEdge(son, i);
+        }
+
+        return GT;
+    }
+
+    List<Integer> getNeighbours(int node){
+        if (!(1 <= node && node <= N)) throw new AssertionError();
+
+        List<Integer> list = new ArrayList<>();
+
+        for (int p = head[node - 1]; p != NIL; p = graph.get(p).next) {
+            list.add(graph.get(p).node + 1);
+        }
+
+        return list;
+    }
 }
