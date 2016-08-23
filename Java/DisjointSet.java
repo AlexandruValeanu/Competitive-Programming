@@ -2,6 +2,7 @@ class DisjointSet {
     private final int[] father;
     private final int[] rank;
     private final int N;
+    private int numberOfComponents;
 
     DisjointSet(int N){
         this.N = N;
@@ -10,6 +11,8 @@ class DisjointSet {
 
         for (int i = 1; i <= N; i++)
             initialize(i);
+
+        numberOfComponents = N;
     }
 
     void initialize(int node){
@@ -32,6 +35,8 @@ class DisjointSet {
         y = find(y);
 
         if (x != y){
+            numberOfComponents--;
+
             if (rank[x] < rank[y])
                 father[x] = y;
             else
@@ -44,5 +49,9 @@ class DisjointSet {
 
     boolean connected(int x, int y){
         return find(x) == find(y);
+    }
+
+    int getNumberOfComponents(){
+        return numberOfComponents;
     }
 }
