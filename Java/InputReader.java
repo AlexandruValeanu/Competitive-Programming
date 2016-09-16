@@ -1,4 +1,4 @@
-class InputReader{
+class InputReader implements AutoCloseable{
     private BufferedReader reader;
     private StringTokenizer tokenizer;
     private InputStream inputStream;
@@ -22,15 +22,15 @@ class InputReader{
         return  tokenizer.nextToken();
     }
 
-    int nextInt() {
+    public int nextInt() {
         return Integer.parseInt(nextToken());
     }
 
-    String nextString(){
+    public String nextString(){
         return nextToken();
     }
 
-    void close() throws IOException {
+    public void close() throws IOException {
         inputStream.close();
     }
 }
