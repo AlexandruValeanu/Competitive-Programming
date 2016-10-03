@@ -30,7 +30,11 @@ class InputReader implements AutoCloseable{
         return nextToken();
     }
 
-    public void close() throws IOException {
-        inputStream.close();
+    public void close() {
+        try {
+            inputStream.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
