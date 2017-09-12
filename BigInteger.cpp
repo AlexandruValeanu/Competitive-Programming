@@ -508,6 +508,9 @@ void BigInteger::trim()
 {
     while (this->a.size() && this->a.back() == 0)
         this->a.pop_back();
+
+    if (this->a.empty())
+      this->sign = 1;
 }
 
 size_t BigInteger::numberOfDigits() const
@@ -1491,5 +1494,15 @@ long long BigInteger::toLongLong() const
 
 int main()
 {
-    return 0;
+  BigInteger a("6851638611761610609716681156512900987231016964631270566860079529345701");
+  BigInteger b("41109831670569663658300086939077404909608122265524774868353822811305361");
+  BigInteger c("67585198634817523235520443624317923");
+
+  cout << b / c << endl;
+
+  // cout << b / a.gcd(b) << endl;
+  // cout << a.gcd(b) << endl;
+  // cout << b % a.gcd(b) << endl;
+
+  return 0;
 }
